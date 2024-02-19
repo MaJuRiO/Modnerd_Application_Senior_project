@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:senior_project/login.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -6,9 +7,6 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("login with kmutt email"),
-      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -22,9 +20,17 @@ class HomeScreen extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            const Align(alignment: Alignment.topCenter, child: Text("MODLINK")),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(0, 150, 0, 0),
+              child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Text(
+                    "MODLINK",
+                    style: TextStyle(fontSize: 48, color: Colors.white),
+                  )),
+            ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(0, 360, 0, 0),
+              padding: const EdgeInsets.fromLTRB(0, 420, 0, 0),
               child: Center(
                 child: Container(
                   width: double.infinity,
@@ -76,7 +82,12 @@ class HomeScreen extends StatelessWidget {
                           ]),
                           borderRadius: BorderRadius.circular(20.0)),
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) {
+                            return const LoginScreen();
+                          }));
+                        },
                         style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent),
@@ -88,6 +99,14 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ]),
                 ),
+              ),
+            ),
+            const Center(
+              child: Image(
+                image: AssetImage(
+                    'assets/images/Ant_Emoji.png'), // เปลี่ยนเป็นที่อยู่ของรูปภาพที่คุณต้องการแสดง
+                width: 250, // กำหนดความกว้างของรูปภาพ
+                height: 200, // กำหนดความสูงของรูปภาพ
               ),
             ),
           ],
