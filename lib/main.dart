@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:senior_project/home.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:senior_project/loginscreen.dart';
+import 'package:intl/intl.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
+  initializeDateFormatting();
 }
 
 class MyApp extends StatelessWidget {
@@ -12,9 +16,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(fontFamily: 'Roboto'),
       home: const HomeScreen(),
     );
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:senior_project/dashboard.dart';
-import 'package:senior_project/login.dart';
+import 'package:senior_project/dashboardPage.dart';
+import 'package:senior_project/loginwithMail.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -64,10 +64,10 @@ class HomeScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(20.0)),
                           child: ElevatedButton(
                             onPressed: () {
-                              Navigator.push(context,
-                                  MaterialPageRoute(builder: (context) {
-                                return const Dashboard();
-                              }));
+                              //Navigator.push(context,
+                              //    MaterialPageRoute(builder: (context) {
+                              //  return;
+                              //}));
                             },
                             style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.transparent,
