@@ -42,6 +42,7 @@ class _DashboardState extends State<Dashboard> {
         );
         if (response.statusCode == 200) {
           // ดำเนินการกับข้อมูลที่ได้รับ
+          prefs.setString('profile_data', response.body);
           Map<String, dynamic> responseData = jsonDecode(response.body);
           String emailValue = responseData['Email'];
           var profile = await http.get(

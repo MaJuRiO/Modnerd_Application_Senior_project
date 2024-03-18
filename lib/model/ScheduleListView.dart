@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'utils/colors_util.dart';
 import 'utils/date_utils.dart' as date_util;
 
@@ -25,6 +28,33 @@ class _ScheduleState extends State<Schedule> {
   DateTime currentDateTime = DateTime.now();
 
   TextEditingController controller = TextEditingController();
+
+  Future<Map<String, dynamic>> fetchAPI(String url) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    Map<String, dynamic> tokenMap = json.decode(token!);
+    String accessToken = tokenMap['access_token'];
+    try {
+      // ทำการ GET request ด้วย http.get() และรอการตอบกลับ
+      http.Response response = await http.get(
+        Uri.parse(url),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      // ตรวจสอบสถานะของ response
+      if (response.statusCode == 200) {
+        // ถ้าสำเร็จ ให้แปลงข้อมูล JSON ให้เป็น Map และ return
+        Map<String, dynamic> data = json.decode(response.body);
+        return data;
+      } else {
+        // ถ้าไม่สำเร็จ ให้ throw ข้อผิดพลาด
+        throw Exception(
+            'Failed to load data, status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      // กรณีเกิดข้อผิดพลาดในการเชื่อมต่อ
+      throw Exception('Failed to load data: $error');
+    }
+  }
 
   @override
   void initState() {
@@ -262,8 +292,16 @@ class _ScheduleState extends State<Schedule> {
                                   ),
                                 ),
                                 GestureDetector(
-                                  onTap: () {
-                                    print('tab');
+                                  onTap: () async {
+                                    SharedPreferences prefs =
+                                        await SharedPreferences.getInstance();
+                                    String? data =
+                                        prefs.getString('profile_data');
+                                    Map<String, dynamic> profileData =
+                                        jsonDecode(data!);
+                                    print(profileData['StudentID']);
+                                    print(widget.todos[index]['Course_code']);
+                                    print(widget.todos[index]['Date']);
                                   },
                                   child: Container(
                                       width: 90,
