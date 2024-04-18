@@ -3,6 +3,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:senior_project/model/ScheduleListView.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,66 +12,27 @@ import 'package:http/http.dart' as http;
 import 'package:senior_project/profilePage.dart';
 
 class Dashboard extends StatefulWidget {
-  const Dashboard({super.key});
+  Map<String, dynamic> profilesData;
+  Dashboard({Key? key, required this.profilesData}) : super(key: key);
+
   @override
   State<Dashboard> createState() => _DashboardState();
 }
 
 class _DashboardState extends State<Dashboard> {
-  Map<String, dynamic> profilesData = {};
   int currentPageIndex = 0;
+  late final Map<String, dynamic> profilesData;
 
-  List<Map<String, dynamic>>? attendences;
   @override
   void initState() {
     super.initState();
-    fetchUserData(); // เรียกใช้งานฟังก์ชันเมื่อหน้าถูกโหลด
+    profilesData = widget.profilesData;
     fetchAttendence();
-  }
-
-  Future<void> fetchUserData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-    // ตรวจสอบว่ามี token หรือไม่
-    if (token != null) {
-      Map<String, dynamic> tokenMap = json.decode(token);
-      String accessToken = tokenMap['access_token'];
-      String apiUrl = 'http://10.0.2.2:8000/users/me';
-      try {
-        final response = await http.get(
-          Uri.parse(apiUrl),
-          headers: {'Authorization': 'Bearer $accessToken'},
-        );
-        if (response.statusCode == 200) {
-          // ดำเนินการกับข้อมูลที่ได้รับ
-          prefs.setString('profile_data', response.body);
-          Map<String, dynamic> responseData = jsonDecode(response.body);
-          String emailValue = responseData['Email'];
-          var profile = await http.get(
-            Uri.parse('http://10.0.2.2:8000/users/$emailValue'),
-          );
-          if (profile.statusCode == 200) {
-            setState(() {
-              profilesData = jsonDecode(profile.body);
-            });
-          }
-        } else {
-          // กรณีไม่สามารถเข้าถึงข้อมูลได้
-          print('Failed to fetch user data');
-        }
-      } catch (e) {
-        // กรณีเกิดข้อผิดพลาดในการเรียก API
-        print('Error: $e');
-      }
-    } else {
-      // กรณีไม่พบ token
-      print('Token not found');
-    }
   }
 
   Future<List<Map<String, dynamic>>> fetchAttendence() async {
     http.Response response = await http.post(
-      Uri.parse('http://10.0.2.2:8000/attendance'),
+      Uri.parse('${dotenv.env['API_LINK']}/schedule'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -80,7 +43,7 @@ class _DashboardState extends State<Dashboard> {
       final List<dynamic> attendence = jsonDecode(response.body);
       return attendence.cast<Map<String, dynamic>>();
     } else {
-      throw Exception('Failed to load attendances from API');
+      return [];
     }
   }
 
@@ -129,7 +92,7 @@ class _DashboardState extends State<Dashboard> {
         Padding(
           padding: const EdgeInsets.fromLTRB(90, 100, 0, 0),
           child: Text(
-            '${profilesData?['FirstName']} ${profilesData?['LastName']}',
+            '${profilesData['FirstName']} ${profilesData['LastName']}',
             style: const TextStyle(fontSize: 18),
           ),
         ),
@@ -162,13 +125,14 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.fromLTRB(20, 350, 0, 0),
-          child: Text(
-            "ตารางของฉัน",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-        ),
+        Padding(
+            padding: const EdgeInsets.fromLTRB(20, 350, 0, 0),
+            child: (profilesData['auth_users']['Roll'] == 'Student')
+                ? const Text('ตารางเรียน',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
+                : const Text('ตารางสอน',
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 380, 0, 0),
           child: FutureBuilder<List<Map<String, dynamic>>>(

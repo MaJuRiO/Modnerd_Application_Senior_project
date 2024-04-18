@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:senior_project/dashboardPage.dart';
-import 'package:senior_project/loginwithMail.dart';
+import 'package:senior_project/Auth/Login_with_mail.dart';
+import 'package:senior_project/model/camera.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -64,10 +64,11 @@ class HomeScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(20.0)),
                           child: ElevatedButton(
                             onPressed: () {
-                              //Navigator.push(context,
-                              //    MaterialPageRoute(builder: (context) {
-                              //  return;
-                              //}));
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const CameraScreen()));
                             },
                             style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.transparent,
@@ -93,7 +94,7 @@ class HomeScreen extends StatelessWidget {
                           onPressed: () {
                             Navigator.push(context,
                                 MaterialPageRoute(builder: (context) {
-                              return const LoginScreen();
+                              return const MailAuth();
                             }));
                           },
                           style: ElevatedButton.styleFrom(

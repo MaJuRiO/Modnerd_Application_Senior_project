@@ -64,4 +64,9 @@ flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+    implementation platform('com.google.firebase:firebase-bom:32.7.4')
+    implementation 'com.google.mlkit:face-detection:16.1.5'
+}
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'

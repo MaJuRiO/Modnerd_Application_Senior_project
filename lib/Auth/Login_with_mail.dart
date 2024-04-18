@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:senior_project/Auth/Login_with_PIN.dart';
 import 'package:senior_project/dashboardPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class MailAuth extends StatefulWidget {
+  const MailAuth({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<MailAuth> createState() => _MailAuthState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _MailAuthState extends State<MailAuth> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -21,33 +22,26 @@ class _LoginScreenState extends State<LoginScreen> {
     // อ่านค่า username และ password จาก text controller
     String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
-    ;
     // URL ของ API สำหรับการ login
-    String apiUrl = 'http://10.0.2.2:8000/token';
+    String apiUrl = '${dotenv.env['API_LINK']}/token';
 
-    try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        body: {"username": username, "password": password},
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      );
-      if (response.statusCode == 200) {
-        // ถ้า login สำเร็จ ให้ทำการเรียกหน้าอื่นๆ ตามที่ต้องการ
-        // หรือทำการเก็บ token และข้อมูลผู้ใช้ไว้
-        // ตัวอย่างเช่น Navigator.push(), SharedPreferences เป็นต้น
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString('token', response.body);
-        Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return const Dashboard();
-        }));
-      } else {
-        // กรณี login ไม่สำเร็จ
-        setState(() {
-          loginFailed = true;
-        });
-      }
-    } catch (e) {
-      print('Error: $e');
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      body: {"username": username, "password": password},
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    );
+    if (response.statusCode == 200) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('token', response.body);
+
+      Navigator.push(context, MaterialPageRoute(builder: (context) {
+        return const PinAuth();
+      }));
+      if (!context.mounted) return;
+    } else {
+      setState(() {
+        loginFailed = true;
+      });
     }
   }
 

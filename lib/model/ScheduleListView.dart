@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:senior_project/class_detail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'utils/colors_util.dart';
 import 'utils/date_utils.dart' as date_util;
@@ -297,11 +298,17 @@ class _ScheduleState extends State<Schedule> {
                                         await SharedPreferences.getInstance();
                                     String? data =
                                         prefs.getString('profile_data');
-                                    Map<String, dynamic> profileData =
-                                        jsonDecode(data!);
-                                    print(profileData['StudentID']);
-                                    print(widget.todos[index]['Course_code']);
-                                    print(widget.todos[index]['Date']);
+                                    if (data != null) {
+                                      Map<String, dynamic> profileData =
+                                          jsonDecode(data);
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => Class_Detail(
+                                                attendenceDetail:
+                                                    widget.todos[index]),
+                                          ));
+                                    }
                                   },
                                   child: Container(
                                       width: 90,

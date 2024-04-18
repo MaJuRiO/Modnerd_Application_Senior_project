@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "17143414016",
+    "project_id": "cpe34-seniorproject-maskedface",
+    "storage_bucket": "cpe34-seniorproject-maskedface.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:17143414016:android:8cadeb3cade65437c347e5",
+        "android_client_info": {
+          "package_name": "com.example.senior_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3i2TWijD8v4euaQJlQA-t9DACY4BVH1E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
