@@ -101,7 +101,7 @@ class _ScheduleState extends State<Schedule> {
 
   Widget capsuleView(int index) {
     return Padding(
-        padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+        padding: const EdgeInsets.fromLTRB(8, 0, 0, 8),
         child: GestureDetector(
           onTap: () {
             setState(() {
@@ -183,7 +183,7 @@ class _ScheduleState extends State<Schedule> {
     );
   }
 
-  Widget todoList() {
+  Widget studentClass() {
     return Container(
       margin: EdgeInsets.fromLTRB(10, height * 0.38, 10, 10),
       width: width,
@@ -222,7 +222,7 @@ class _ScheduleState extends State<Schedule> {
                   ),
                   Container(
                     margin: EdgeInsets.fromLTRB(15, 0, 0, 15),
-                    width: 320,
+                    width: MediaQuery.of(context).size.width * 0.75,
                     height: 120,
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -294,13 +294,7 @@ class _ScheduleState extends State<Schedule> {
                                 ),
                                 GestureDetector(
                                   onTap: () async {
-                                    SharedPreferences prefs =
-                                        await SharedPreferences.getInstance();
-                                    String? data =
-                                        prefs.getString('profile_data');
-                                    if (data != null) {
-                                      Map<String, dynamic> profileData =
-                                          jsonDecode(data);
+                                    if (widget.title == 'Student') {
                                       Navigator.push(
                                           context,
                                           MaterialPageRoute(
@@ -340,6 +334,177 @@ class _ScheduleState extends State<Schedule> {
     );
   }
 
+  Widget professorClass() {
+    return Container(
+      margin: EdgeInsets.fromLTRB(10, height * 0.38, 10, 10),
+      width: width,
+      height: MediaQuery.of(context).size.height,
+      child: ListView.builder(
+          itemCount: widget.todos.length,
+          padding: EdgeInsets.zero,
+          itemBuilder: (BuildContext context, int index) {
+            if (widget.todos[index]['recurrence_pattern'] ==
+                DateFormat.EEEE().format(currentDateTime)) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
+                    child: Column(
+                      children: [
+                        Text(
+                          '${widget.todos[index]['start_time']}'
+                              .substring(0, 5),
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: HexColor('A9A8A9')),
+                        ),
+                        Text(
+                          '${widget.todos[index]['end_time']}'.substring(0, 5),
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: HexColor('A9A8A9')),
+                        )
+                      ],
+                    ),
+                  ),
+                  if (widget.title != 'Student')
+                    InkWell(
+                      splashColor: Colors.blue.withAlpha(30),
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Container(
+                                child: Text('Test'),
+                              ),
+                            ));
+                      },
+                      child: Container(
+                        margin: EdgeInsets.fromLTRB(15, 0, 0, 15),
+                        width: MediaQuery.of(context).size.width * 0.75,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5), // สีของเงา
+                              spreadRadius: 5, // รัศมีการกระจายของเงา
+                              blurRadius: 7, // ความเบลอของเงา
+                              offset: const Offset(0, 3), // ตำแหน่งเงา (x, y)
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
+                              child: Container(
+                                width: 4,
+                                height: 55,
+                                decoration: BoxDecoration(
+                                  color: HexColor('F04E23'),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                            Column(
+                              //mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(20, 10, 0, 0),
+                                  child: Text(
+                                    '${widget.todos[index]['Course_code']}',
+                                    style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                                  child: SizedBox(
+                                    width: 250,
+                                    child: Text(
+                                      '${widget.todos[index]['CourseName']}',
+                                      overflow: TextOverflow.fade,
+                                      maxLines: 1,
+                                      softWrap: false,
+                                      style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 90,
+                                      decoration: BoxDecoration(
+                                          color: HexColor('F8F8F7'),
+                                          borderRadius:
+                                              BorderRadius.circular(15)),
+                                      child: Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(
+                                              '${widget.todos[index]['room']}'),
+                                        ),
+                                      ),
+                                    ),
+                                    if (widget.title == 'Student')
+                                      GestureDetector(
+                                        onTap: () async {
+                                          if (widget.title == 'Student') {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      Class_Detail(
+                                                          attendenceDetail:
+                                                              widget.todos[
+                                                                  index]),
+                                                ));
+                                          }
+                                        },
+                                        child: Container(
+                                            width: 90,
+                                            decoration: BoxDecoration(
+                                                color: Colors.red,
+                                                borderRadius:
+                                                    BorderRadius.circular(15)),
+                                            child: Center(
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Text(
+                                                    '${widget.todos[index]['Status']}'),
+                                              ),
+                                            )),
+                                      )
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            } else {
+              return const SizedBox.shrink();
+            }
+          }),
+    );
+  }
+
   Widget noclass() {
     return (const Center(
       child: Padding(
@@ -364,7 +529,8 @@ class _ScheduleState extends State<Schedule> {
         topView(),
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 100, 0, 0),
-          child: todoList(),
+          child:
+              (widget.title == 'Student') ? studentClass() : professorClass(),
         )
       ],
     ));

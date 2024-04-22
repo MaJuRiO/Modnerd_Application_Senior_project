@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -37,6 +38,23 @@ class _DashboardState extends State<Dashboard> {
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode({"StudentID": "63070507207"}),
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> attendence = jsonDecode(response.body);
+      return attendence.cast<Map<String, dynamic>>();
+    } else {
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchprofessorClass() async {
+    http.Response response = await http.post(
+      Uri.parse('${dotenv.env['API_LINK']}/Subjects_taught'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode({"Professor_name": "${profilesData['FirstName']}"}),
     );
 
     if (response.statusCode == 200) {
@@ -135,20 +153,37 @@ class _DashboardState extends State<Dashboard> {
                         TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 380, 0, 0),
-          child: FutureBuilder<List<Map<String, dynamic>>>(
-              future: fetchAttendence(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else {
-                  return Schedule(
-                    title: 'My Schedule',
-                    todos: snapshot.data!,
-                  );
-                }
-              }),
+          child: (profilesData['auth_users']['Roll'] == 'Student')
+              ? FutureBuilder<List<Map<String, dynamic>>>(
+                  future: fetchAttendence(),
+                  builder: (context, snapshot) {
+                    print(profilesData['auth_users']['Roll']);
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else {
+                      return Schedule(
+                        title: '${profilesData['auth_users']['Roll']}',
+                        todos: snapshot.data!,
+                      );
+                    }
+                  })
+              : FutureBuilder<List<Map<String, dynamic>>>(
+                  future: fetchprofessorClass(),
+                  builder: (context, snapshot) {
+                    print(profilesData['auth_users']['Roll']);
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else {
+                      return Schedule(
+                        title: '${profilesData['auth_users']['Roll']}',
+                        todos: snapshot.data!,
+                      );
+                    }
+                  }),
         ),
       ]),
     );
@@ -156,32 +191,67 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        bottomNavigationBar: NavigationBar(
-          height: 65,
-          onDestinationSelected: (int index) {
-            setState(() {
-              currentPageIndex = index;
-            });
-          },
-          labelBehavior: null,
-          indicatorColor: Colors.amber,
-          selectedIndex: currentPageIndex,
-          destinations: const <Widget>[
-            NavigationDestination(
-              selectedIcon: Icon(Icons.home),
-              icon: Icon(Icons.home_outlined),
-              label: '',
-            ),
-            NavigationDestination(
-              icon: Badge(child: Icon(Icons.notifications_sharp)),
-              label: '',
-            ),
-          ],
+    return WillPopScope(
+      onWillPop: () async {
+        // แสดง popup
+        bool exit = await showDialog(
+          context: context,
+          builder: (context) => const ExitConfirmationDialog(),
+        );
+        // คืนค่า true หากต้องการออก และ false หากต้องการยกเลิก
+        return exit ?? false;
+      },
+      child: Scaffold(
+          bottomNavigationBar: NavigationBar(
+            height: 65,
+            onDestinationSelected: (int index) {
+              setState(() {
+                currentPageIndex = index;
+              });
+            },
+            labelBehavior: null,
+            indicatorColor: Colors.amber,
+            selectedIndex: currentPageIndex,
+            destinations: const <Widget>[
+              NavigationDestination(
+                selectedIcon: Icon(Icons.home),
+                icon: Icon(Icons.home_outlined),
+                label: '',
+              ),
+              NavigationDestination(
+                icon: Badge(child: Icon(Icons.notifications_sharp)),
+                label: '',
+              ),
+            ],
+          ),
+          body: <Widget>[
+            dashboardBody(),
+            ProfilePage(profilesData: profilesData)
+          ][currentPageIndex]),
+    );
+  }
+}
+
+class ExitConfirmationDialog extends StatelessWidget {
+  const ExitConfirmationDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('คุณแน่ใจหรือไม่?'),
+      content: const Text('คุณต้องการออกจากแอปพลิเคชันหรือไม่?'),
+      actions: <Widget>[
+        ElevatedButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('ไม่'),
         ),
-        body: <Widget>[
-          dashboardBody(),
-          ProfilePage(profilesData: profilesData)
-        ][currentPageIndex]);
+        ElevatedButton(
+          onPressed: () {
+            exit(0);
+          },
+          child: const Text('ใช่'),
+        ),
+      ],
+    );
   }
 }
