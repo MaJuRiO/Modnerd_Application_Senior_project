@@ -40,7 +40,7 @@ class _PinAuthState extends State<PinAuth> {
     if (response.statusCode == 200) {
       Navigator.push(context, MaterialPageRoute(builder: (context) {
         return Dashboard(
-          profilesData: profilesData,
+          profiledata: profilesData,
         );
       }));
       setState(() {
@@ -78,11 +78,9 @@ class _PinAuthState extends State<PinAuth> {
         });
       } else {
         // กรณีไม่สามารถเข้าถึงข้อมูลได้
-        print('Failed to fetch user data');
       }
     } else {
       // กรณีไม่พบ token
-      print('Token not found');
     }
   }
 
@@ -109,7 +107,7 @@ class _PinAuthState extends State<PinAuth> {
             side: BorderSide(width: 2, color: HexColor('D9D9D9'))),
         child: Text(
           number.toString(),
-          style: TextStyle(color: Colors.black, fontSize: 32),
+          style: const TextStyle(color: Colors.black, fontSize: 32),
         ),
       ),
     );
@@ -150,7 +148,11 @@ class _PinAuthState extends State<PinAuth> {
             ),
             Padding(
               padding: const EdgeInsets.all(12.0),
-              child: Center(child: Text("${profilesData['StudentID']}")),
+              child: (roll == "Student")
+                  ? Center(child: Text("${profilesData['StudentID']}"))
+                  : Center(
+                      child: Text(
+                          "${profilesData['FirstName']} ${profilesData['LastName']}")),
             ),
 
             /// pin code area

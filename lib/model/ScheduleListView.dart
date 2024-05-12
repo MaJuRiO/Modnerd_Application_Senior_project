@@ -1,20 +1,20 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:senior_project/class_detail.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:senior_project/main.dart';
+import 'package:senior_project/model/Class_summary.dart';
 import 'utils/colors_util.dart';
 import 'utils/date_utils.dart' as date_util;
 
 class Schedule extends StatefulWidget {
   final String title;
   final List<Map<String, dynamic>> todos;
-  const Schedule({Key? key, required this.title, required this.todos})
+  final Map<String, dynamic> profilesData;
+  const Schedule(
+      {Key? key,
+      required this.title,
+      required this.todos,
+      required this.profilesData})
       : super(key: key);
 
   @override
@@ -30,33 +30,6 @@ class _ScheduleState extends State<Schedule> {
 
   TextEditingController controller = TextEditingController();
 
-  Future<Map<String, dynamic>> fetchAPI(String url) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-    Map<String, dynamic> tokenMap = json.decode(token!);
-    String accessToken = tokenMap['access_token'];
-    try {
-      // ทำการ GET request ด้วย http.get() และรอการตอบกลับ
-      http.Response response = await http.get(
-        Uri.parse(url),
-        headers: {'Authorization': 'Bearer $accessToken'},
-      );
-      // ตรวจสอบสถานะของ response
-      if (response.statusCode == 200) {
-        // ถ้าสำเร็จ ให้แปลงข้อมูล JSON ให้เป็น Map และ return
-        Map<String, dynamic> data = json.decode(response.body);
-        return data;
-      } else {
-        // ถ้าไม่สำเร็จ ให้ throw ข้อผิดพลาด
-        throw Exception(
-            'Failed to load data, status code: ${response.statusCode}');
-      }
-    } catch (error) {
-      // กรณีเกิดข้อผิดพลาดในการเชื่อมต่อ
-      throw Exception('Failed to load data: $error');
-    }
-  }
-
   @override
   void initState() {
     currentMonthList = date_util.DateUtils.daysInMonth(currentDateTime);
@@ -65,6 +38,46 @@ class _ScheduleState extends State<Schedule> {
     scrollController =
         ScrollController(initialScrollOffset: 70.0 * currentDateTime.day);
     super.initState();
+  }
+
+  bool isTimePassed(String date, String startTimeString, String endTimeString) {
+    // แปลง String date เป็น DateTime
+    List<String> dateSplit = date.split('-');
+    DateTime targetDate = DateTime(
+      int.parse(dateSplit[0]),
+      int.parse(dateSplit[1]),
+      int.parse(dateSplit[2]),
+    );
+
+    // แปลง String timeString เป็น DateTime
+    List<String> startTimeSplit = startTimeString.split(':');
+    DateTime startTargetTime = DateTime(
+      targetDate.year,
+      targetDate.month,
+      targetDate.day,
+      int.parse(startTimeSplit[0]),
+      int.parse(startTimeSplit[1]),
+      int.parse(startTimeSplit[2]),
+    );
+
+    List<String> endTimeSplit = endTimeString.split(':');
+    DateTime endTargetTime = DateTime(
+      targetDate.year,
+      targetDate.month,
+      targetDate.day,
+      int.parse(endTimeSplit[0]),
+      int.parse(endTimeSplit[1]),
+      int.parse(endTimeSplit[2]),
+    );
+
+    print(startTargetTime);
+    // เปรียบเทียบเวลา
+    if (DateTime.now().isAfter(startTargetTime) &&
+        DateTime.now().isBefore(endTargetTime)) {
+      return true; // เวลาผ่านไปแล้ว
+    } else {
+      return false; // เวลายังไม่ผ่าน
+    }
   }
 
   Widget titleView() {
@@ -170,7 +183,7 @@ class _ScheduleState extends State<Schedule> {
   }
 
   Widget topView() {
-    return Container(
+    return SizedBox(
       height: height,
       width: width,
       child: Column(
@@ -188,202 +201,54 @@ class _ScheduleState extends State<Schedule> {
       margin: EdgeInsets.fromLTRB(10, height * 0.38, 10, 10),
       width: width,
       height: MediaQuery.of(context).size.height,
-      child: ListView.builder(
-          itemCount: widget.todos.length,
-          padding: EdgeInsets.zero,
-          itemBuilder: (BuildContext context, int index) {
-            if (widget.todos[index]['Date'] ==
-                DateFormat('yyyy-MM-dd').format(currentDateTime)) {
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
-                    child: Column(
-                      children: [
-                        Text(
-                          '${widget.todos[index]['course_detail']['start_time']}'
-                              .substring(0, 5),
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: HexColor('A9A8A9')),
-                        ),
-                        Text(
-                          '${widget.todos[index]['course_detail']['end_time']}'
-                              .substring(0, 5),
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: HexColor('A9A8A9')),
-                        )
-                      ],
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(15, 0, 0, 15),
-                    width: MediaQuery.of(context).size.width * 0.75,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5), // สีของเงา
-                          spreadRadius: 5, // รัศมีการกระจายของเงา
-                          blurRadius: 7, // ความเบลอของเงา
-                          offset: const Offset(0, 3), // ตำแหน่งเงา (x, y)
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
-                          child: Container(
-                            width: 4,
-                            height: 55,
-                            decoration: BoxDecoration(
-                              color: HexColor('F04E23'),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                        Column(
-                          //mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
+        children: [
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+              child: Image(
+                image: AssetImage(
+                    'assets/images/Ant_Emoji.png'), // เปลี่ยนเป็นที่อยู่ของรูปภาพที่คุณต้องการแสดง
+                width: 480 / 2, // กำหนดความกว้างของรูปภาพ
+                height: 560 / 2, // กำหนดความสูงของรูปภาพ
+              ),
+            ),
+          ),
+          ListView.builder(
+              itemCount: widget.todos.length,
+              padding: EdgeInsets.zero,
+              itemBuilder: (BuildContext context, int index) {
+                if (widget.todos[index]['Date'] ==
+                    DateFormat('yyyy-MM-dd').format(currentDateTime)) {
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
+                        child: Column(
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(20, 10, 0, 0),
-                              child: Text(
-                                '${widget.todos[index]['Course_code']}',
-                                style: const TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
+                            Text(
+                              '${widget.todos[index]['course_detail']['start_time']}'
+                                  .substring(0, 5),
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: HexColor('A9A8A9')),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                              child: SizedBox(
-                                width: 250,
-                                child: Text(
-                                  '${widget.todos[index]['course_detail']['CourseName']}',
-                                  overflow: TextOverflow.fade,
-                                  maxLines: 1,
-                                  softWrap: false,
-                                  style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                Container(
-                                  width: 90,
-                                  decoration: BoxDecoration(
-                                      color: HexColor('F8F8F7'),
-                                      borderRadius: BorderRadius.circular(15)),
-                                  child: Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                          '${widget.todos[index]['course_detail']['room']}'),
-                                    ),
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () async {
-                                    if (widget.title == 'Student') {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => Class_Detail(
-                                                attendenceDetail:
-                                                    widget.todos[index]),
-                                          ));
-                                    }
-                                  },
-                                  child: Container(
-                                      width: 90,
-                                      decoration: BoxDecoration(
-                                          color: Colors.red,
-                                          borderRadius:
-                                              BorderRadius.circular(15)),
-                                      child: Center(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(
-                                              '${widget.todos[index]['Status']}'),
-                                        ),
-                                      )),
-                                )
-                              ],
-                            ),
+                            Text(
+                              '${widget.todos[index]['course_detail']['end_time']}'
+                                  .substring(0, 5),
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: HexColor('A9A8A9')),
+                            )
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            } else {
-              return const SizedBox.shrink();
-            }
-          }),
-    );
-  }
-
-  Widget professorClass() {
-    return Container(
-      margin: EdgeInsets.fromLTRB(10, height * 0.38, 10, 10),
-      width: width,
-      height: MediaQuery.of(context).size.height,
-      child: ListView.builder(
-          itemCount: widget.todos.length,
-          padding: EdgeInsets.zero,
-          itemBuilder: (BuildContext context, int index) {
-            if (widget.todos[index]['recurrence_pattern'] ==
-                DateFormat.EEEE().format(currentDateTime)) {
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
-                    child: Column(
-                      children: [
-                        Text(
-                          '${widget.todos[index]['start_time']}'
-                              .substring(0, 5),
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: HexColor('A9A8A9')),
-                        ),
-                        Text(
-                          '${widget.todos[index]['end_time']}'.substring(0, 5),
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: HexColor('A9A8A9')),
-                        )
-                      ],
-                    ),
-                  ),
-                  if (widget.title != 'Student')
-                    InkWell(
-                      splashColor: Colors.blue.withAlpha(30),
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Container(
-                                child: Text('Test'),
-                              ),
-                            ));
-                      },
-                      child: Container(
-                        margin: EdgeInsets.fromLTRB(15, 0, 0, 15),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.fromLTRB(15, 0, 0, 15),
                         width: MediaQuery.of(context).size.width * 0.75,
                         height: 120,
                         decoration: BoxDecoration(
@@ -407,7 +272,7 @@ class _ScheduleState extends State<Schedule> {
                                 width: 4,
                                 height: 55,
                                 decoration: BoxDecoration(
-                                  color: HexColor('F04E23'),
+                                  color: gradiant_2,
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
@@ -432,7 +297,7 @@ class _ScheduleState extends State<Schedule> {
                                   child: SizedBox(
                                     width: 250,
                                     child: Text(
-                                      '${widget.todos[index]['CourseName']}',
+                                      '${widget.todos[index]['course_detail']['CourseName']}',
                                       overflow: TextOverflow.fade,
                                       maxLines: 1,
                                       softWrap: false,
@@ -454,40 +319,72 @@ class _ScheduleState extends State<Schedule> {
                                         child: Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: Text(
-                                              '${widget.todos[index]['room']}'),
+                                              '${widget.todos[index]['course_detail']['room']}'),
                                         ),
                                       ),
                                     ),
-                                    if (widget.title == 'Student')
-                                      GestureDetector(
-                                        onTap: () async {
-                                          if (widget.title == 'Student') {
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      Class_Detail(
-                                                          attendenceDetail:
-                                                              widget.todos[
-                                                                  index]),
-                                                ));
-                                          }
-                                        },
-                                        child: Container(
-                                            width: 90,
-                                            decoration: BoxDecoration(
-                                                color: Colors.red,
-                                                borderRadius:
-                                                    BorderRadius.circular(15)),
-                                            child: Center(
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Text(
-                                                    '${widget.todos[index]['Status']}'),
-                                              ),
-                                            )),
-                                      )
+                                    GestureDetector(
+                                      onTap: isTimePassed(
+                                              widget.todos[index]['Date'],
+                                              widget.todos[index]
+                                                      ['course_detail']
+                                                  ['start_time'],
+                                              widget.todos[index]
+                                                  ['course_detail']['end_time'])
+                                          ? () async {
+                                              if (widget.title == 'Student') {
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          Class_Detail(
+                                                        attendenceDetail:
+                                                            widget.todos[index],
+                                                        profilesData:
+                                                            widget.profilesData,
+                                                      ),
+                                                    ));
+                                              }
+                                            }
+                                          : null,
+                                      child: isTimePassed(
+                                              widget.todos[index]['Date'],
+                                              widget.todos[index]
+                                                      ['course_detail']
+                                                  ['start_time'],
+                                              widget.todos[index]
+                                                  ['course_detail']['end_time'])
+                                          ? Container(
+                                              width: 90,
+                                              decoration: BoxDecoration(
+                                                  color: gradiant_1,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          15)),
+                                              child: const Center(
+                                                child: Padding(
+                                                  padding: EdgeInsets.all(8.0),
+                                                  // child: Text(
+                                                  //     '${widget.todos[index]['Status']}'),
+                                                  child: Text('เช็คชื่อ'),
+                                                ),
+                                              ))
+                                          : Container(
+                                              width: 90,
+                                              decoration: BoxDecoration(
+                                                  color: grey,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          15)),
+                                              child: const Center(
+                                                child: Padding(
+                                                  padding: EdgeInsets.all(8.0),
+                                                  // child: Text(
+                                                  //     '${widget.todos[index]['Status']}'),
+                                                  child: Text('เช็คชื่อ'),
+                                                ),
+                                              )),
+                                    )
                                   ],
                                 ),
                               ],
@@ -495,13 +392,180 @@ class _ScheduleState extends State<Schedule> {
                           ],
                         ),
                       ),
-                    ),
-                ],
-              );
-            } else {
-              return const SizedBox.shrink();
-            }
-          }),
+                    ],
+                  );
+                } else {
+                  return const SizedBox.shrink();
+                }
+              }),
+        ],
+      ),
+    );
+  }
+
+  Widget professorClass() {
+    return Container(
+      margin: EdgeInsets.fromLTRB(10, height * 0.38, 10, 10),
+      width: width,
+      height: MediaQuery.of(context).size.height,
+      child: Stack(
+        children: [
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+              child: Image(
+                image: AssetImage(
+                    'assets/images/Ant_Emoji.png'), // เปลี่ยนเป็นที่อยู่ของรูปภาพที่คุณต้องการแสดง
+                width: 480 / 2, // กำหนดความกว้างของรูปภาพ
+                height: 560 / 2, // กำหนดความสูงของรูปภาพ
+              ),
+            ),
+          ),
+          ListView.builder(
+              itemCount: widget.todos.length,
+              padding: EdgeInsets.zero,
+              itemBuilder: (BuildContext context, int index) {
+                if (widget.todos[index]['recurrence_pattern'] ==
+                    DateFormat.EEEE().format(currentDateTime)) {
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
+                        child: Column(
+                          children: [
+                            Text(
+                              '${widget.todos[index]['start_time']}'
+                                  .substring(0, 5),
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: HexColor('A9A8A9')),
+                            ),
+                            Text(
+                              '${widget.todos[index]['end_time']}'
+                                  .substring(0, 5),
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: HexColor('A9A8A9')),
+                            )
+                          ],
+                        ),
+                      ),
+                      if (widget.title != 'Student')
+                        InkWell(
+                          splashColor: Colors.blue.withAlpha(30),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ClassSummary(
+                                  classdetail: widget.todos[index],
+                                  date: DateFormat('yyyy-MM-dd')
+                                      .format(currentDateTime)
+                                      .toString(),
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.fromLTRB(15, 0, 0, 15),
+                            width: MediaQuery.of(context).size.width * 0.75,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color:
+                                      Colors.grey.withOpacity(0.5), // สีของเงา
+                                  spreadRadius: 5, // รัศมีการกระจายของเงา
+                                  blurRadius: 7, // ความเบลอของเงา
+                                  offset:
+                                      const Offset(0, 3), // ตำแหน่งเงา (x, y)
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(0, 15, 0, 0),
+                                  child: Container(
+                                    width: 4,
+                                    height: 55,
+                                    decoration: BoxDecoration(
+                                      color: gradiant_2,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                                Column(
+                                  //mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          20, 10, 0, 0),
+                                      child: Text(
+                                        '${widget.todos[index]['Course_code']}',
+                                        style: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          20, 0, 0, 0),
+                                      child: SizedBox(
+                                        width: 250,
+                                        child: Text(
+                                          '${widget.todos[index]['CourseName']}',
+                                          overflow: TextOverflow.fade,
+                                          maxLines: 1,
+                                          softWrap: false,
+                                          style: const TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Container(
+                                          width: 90,
+                                          decoration: BoxDecoration(
+                                              color: HexColor('F8F8F7'),
+                                              borderRadius:
+                                                  BorderRadius.circular(15)),
+                                          child: Center(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                  '${widget.todos[index]['room']}'),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                } else {
+                  return const SizedBox.shrink();
+                }
+              }),
+        ],
+      ),
     );
   }
 

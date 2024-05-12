@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:senior_project/Auth/Login_Page.dart';
 import 'package:senior_project/securityPage.dart';
 
 class SettingsScreen extends StatelessWidget {
+  final Map<String, dynamic> profiledata;
+
+  const SettingsScreen({super.key, required this.profiledata});
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.height * 0.66,
       // สร้าง UI ของหน้าต่างการตั้งค่า
       child: Column(
@@ -25,7 +30,9 @@ class SettingsScreen extends StatelessWidget {
             onTap: () {
               // ทำสิ่งที่ต้องการเมื่อตัวเลือกถูกเลือก
               Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return const SecurityPage();
+                return SecurityPage(
+                  profiledata: profiledata,
+                );
               })); // ปิดหน้าต่างการตั้งค่า
             },
           ),
@@ -64,8 +71,34 @@ class SettingsScreen extends StatelessWidget {
             leading: const Icon(Icons.settings),
             title: const Text('ออกจากระบบ'),
             onTap: () {
-              // ทำสิ่งที่ต้องการเมื่อตัวเลือกถูกเลือก
-              Navigator.pop(context); // ปิดหน้าต่างการตั้งค่า
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('ยืนยันการออกจากระบบ'),
+                    content: const Text('คุณแน่ใจหรือไม่ที่ต้องการออกจากระบบ?'),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('ยกเลิก'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const LoginScreen()),
+                          );
+                        },
+                        child: const Text('ตกลง'),
+                      ),
+                    ],
+                  );
+                },
+              );
             },
           ),
           const Divider(

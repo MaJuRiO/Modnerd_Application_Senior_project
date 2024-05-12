@@ -1,17 +1,81 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:senior_project/main.dart';
 import 'package:senior_project/model/utils/colors_util.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Class_Detail extends StatelessWidget {
-  Class_Detail({super.key, required this.attendenceDetail});
+  Class_Detail(
+      {super.key, required this.attendenceDetail, required this.profilesData});
 
   final Map<String, dynamic> attendenceDetail;
+  final Map<String, dynamic> profilesData;
 
   String formatTimeWithoutSeconds(String time) {
     DateTime timeHMS = DateFormat.Hms().parse(time);
     return DateFormat.Hm().format(timeHMS);
+  }
+
+  Future<void> checkinClass(String code, BuildContext context) async {
+    print(attendenceDetail);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    Map<String, dynamic> tokenMap = json.decode(token!);
+    String accessToken = tokenMap['access_token'];
+    final response = await http.post(
+      Uri.parse('${dotenv.env['API_LINK']}/checkclassname'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $accessToken'
+      },
+      body: jsonEncode(<String, String>{
+        "studentId": "${profilesData['StudentID']}",
+        "coursecode": "${attendenceDetail['Course_code']}",
+        "code": code
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Succes'),
+            content: Text('สำเร็จ'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Close'),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Fail'),
+            content: Text('ผิดพลาด'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Close'),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -23,27 +87,24 @@ class Class_Detail extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.topRight,
-                colors: <Color>[
-                  Color.fromRGBO(255, 74, 20, 1.0),
-                  Color.fromRGBO(255, 159, 36, 1.0)
-                ]),
+                colors: <Color>[gradiant_2, gradiant_1]),
           ),
         ),
       ),
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.topRight,
             colors: [
-              Color.fromRGBO(255, 74, 20, 1.0),
-              Color.fromRGBO(255, 159, 36, 1.0)
+              gradiant_2,
+              gradiant_1
             ], // สีเริ่มต้นและสีสุดท้ายของ Gradient
           ),
         ),
@@ -108,7 +169,7 @@ class Class_Detail extends StatelessWidget {
     );
   }
 
-  TextEditingController _textController = TextEditingController();
+  final TextEditingController _textController = TextEditingController();
 
   void _showTextFieldDialog(BuildContext context) {
     showDialog(
@@ -127,7 +188,7 @@ class Class_Detail extends StatelessWidget {
                 Navigator.of(context).pop();
                 // Do something with the text entered
                 String enteredText = _textController.text;
-                print("Entered text: $enteredText");
+                checkinClass(enteredText, context);
               },
             ),
             TextButton(

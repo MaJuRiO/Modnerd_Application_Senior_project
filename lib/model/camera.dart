@@ -1,11 +1,16 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 
 /// CameraApp is the Main Application.
 class CameraScreen extends StatefulWidget {
   /// Default Constructor
-  const CameraScreen({super.key});
+  final Map<String, dynamic> profiledata;
+  const CameraScreen({super.key, required this.profiledata});
 
   @override
   State<CameraScreen> createState() => _CameraScreenState();
@@ -14,6 +19,8 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
   CameraController? controller;
   XFile? videoFile;
+  bool left_arrow = false;
+  bool right_arrow = false;
 
   Future<void> initializationCamera() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -68,8 +75,33 @@ class _CameraScreenState extends State<CameraScreen> {
 
     try {
       await cameraController.startVideoRecording();
-    } on CameraException catch (e) {
+    } on CameraException {
       return;
+    }
+  }
+
+  Future<void> _uploadVideo(String path) async {
+    final File file = File(path);
+    final String newFileName = '${widget.profiledata['StudentID']}_face.mp4';
+    final String newPath = '${file.parent.path}/$newFileName';
+
+    try {
+      // Rename the file
+      await file.rename(newPath);
+
+      // Upload the renamed file
+      Uri uri = Uri.parse(
+          '${dotenv.env['API_LINK']}/upload/Video/?student_id=${widget.profiledata['StudentID']}');
+      var request = http.MultipartRequest('POST', uri)
+        ..files.add(await http.MultipartFile.fromPath('video', newPath));
+      var response = await request.send();
+      if (response.statusCode == 200) {
+        print('Video uploaded successfully');
+      } else {
+        print('Failed to upload video');
+      }
+    } catch (e) {
+      print('Error uploading video: $e');
     }
   }
 
@@ -82,22 +114,8 @@ class _CameraScreenState extends State<CameraScreen> {
 
     try {
       return cameraController.stopVideoRecording();
-    } on CameraException catch (e) {
+    } on CameraException {
       return null;
-    }
-  }
-
-  Future<void> pauseVideoRecording() async {
-    final CameraController? cameraController = controller;
-
-    if (cameraController == null || !cameraController.value.isRecordingVideo) {
-      return;
-    }
-
-    try {
-      await cameraController.pauseVideoRecording();
-    } on CameraException catch (e) {
-      rethrow;
     }
   }
 
@@ -115,7 +133,7 @@ class _CameraScreenState extends State<CameraScreen> {
         setState(() {});
       }
       if (file != null) {
-        print('Video recorded to ${file.path}');
+        _uploadVideo(file.path);
         videoFile = file;
       }
     });
@@ -129,11 +147,13 @@ class _CameraScreenState extends State<CameraScreen> {
         IconButton(
           icon: const Icon(Icons.videocam),
           color: Colors.blue,
-          onPressed: cameraController != null &&
-                  cameraController.value.isInitialized &&
-                  !cameraController.value.isRecordingVideo
-              ? onVideoRecordButtonPressed
-              : null,
+          onPressed: () async {
+            cameraController != null &&
+                    cameraController.value.isInitialized &&
+                    !cameraController.value.isRecordingVideo
+                ? onVideoRecordButtonPressed
+                : null;
+          },
         ),
         IconButton(
           icon: const Icon(Icons.stop),
@@ -153,30 +173,89 @@ class _CameraScreenState extends State<CameraScreen> {
     if (controller == null) return Container();
     if (controller?.value.isInitialized == false) return Container();
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('สแกนใบหน้า'),
+      appBar: AppBar(
+        title: const Text('สแกนใบหน้า'),
+      ),
+      body: Stack(
+        children: [
+          SizedBox(
+            height: double.infinity,
+            child: AspectRatio(
+              aspectRatio: 3 / 4,
+              child: CameraPreview(controller!),
+            ),
+          ),
+          SizedBox(
+            height: double.infinity,
+            child: AspectRatio(
+              aspectRatio: 3 / 4,
+              child: Image.asset(
+                'assets/images/Face-Overlay.png',
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          if (left_arrow)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 500, 0, 0),
+              child: Center(child: Image.asset('assets/images/left_arrow.png')),
+            ),
+          if (right_arrow)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 500, 0, 0),
+              child:
+                  Center(child: Image.asset('assets/images/right_arrow.png')),
+            )
+        ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: FloatingActionButton(
+          // onPressed: !controller!.value.isRecordingVideo
+          //     ? onVideoRecordButtonPressed
+          //     : onStopButtonPressed,
+          onPressed: () async {
+            onVideoRecordButtonPressed();
+            await Future.delayed(const Duration(seconds: 5));
+            setState(() {
+              left_arrow = true;
+            });
+            await Future.delayed(const Duration(seconds: 5));
+            setState(() {
+              left_arrow = false;
+              right_arrow = true;
+            });
+            await Future.delayed(const Duration(seconds: 5));
+            setState(() {
+              right_arrow = false;
+            });
+            onStopButtonPressed();
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('บันทึกเรียบร้อย'),
+                  content: const Text(
+                      'ทำการบันทึกใบหน้าที่ไม่สวมใส่หน้ากากอนามัยเรียบร้อย'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('ok'),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+          backgroundColor: Colors.blue,
+          child: Icon(
+            controller!.value.isRecordingVideo ? Icons.stop : Icons.videocam,
+          ),
         ),
-        body: Stack(
-          children: [
-            SizedBox(
-              height: double.infinity,
-              child: AspectRatio(
-                aspectRatio: 3 / 4,
-                child: CameraPreview(controller!),
-              ),
-            ),
-            SizedBox(
-              height: double.infinity,
-              child: AspectRatio(
-                aspectRatio: 3 / 4,
-                child: Image.asset(
-                  'assets/images/camera-overlay-conceptcoder.png',
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            _captureControlRowWidget()
-          ],
-        ));
+      ),
+    );
   }
 }

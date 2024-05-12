@@ -4,17 +4,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:senior_project/main.dart';
 import 'package:senior_project/model/ScheduleListView.dart';
-import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:senior_project/model/utils/colors_util.dart';
 import 'package:senior_project/profilePage.dart';
 
 class Dashboard extends StatefulWidget {
-  Map<String, dynamic> profilesData;
-  Dashboard({Key? key, required this.profilesData}) : super(key: key);
+  final Map<String, dynamic> profiledata;
+  const Dashboard({Key? key, required this.profiledata}) : super(key: key);
 
   @override
   State<Dashboard> createState() => _DashboardState();
@@ -22,13 +21,12 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   int currentPageIndex = 0;
-  late final Map<String, dynamic> profilesData;
+  late final Map<String, dynamic> profilesdata;
 
   @override
   void initState() {
     super.initState();
-    profilesData = widget.profilesData;
-    fetchAttendence();
+    profilesdata = widget.profiledata;
   }
 
   Future<List<Map<String, dynamic>>> fetchAttendence() async {
@@ -37,7 +35,7 @@ class _DashboardState extends State<Dashboard> {
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
-      body: jsonEncode({"StudentID": "63070507207"}),
+      body: jsonEncode({"StudentID": "${profilesdata['StudentID']}"}),
     );
 
     if (response.statusCode == 200) {
@@ -54,7 +52,7 @@ class _DashboardState extends State<Dashboard> {
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
-      body: jsonEncode({"Professor_name": "${profilesData['FirstName']}"}),
+      body: jsonEncode({"Professor_name": "${profilesdata['FirstName']}"}),
     );
 
     if (response.statusCode == 200) {
@@ -67,13 +65,13 @@ class _DashboardState extends State<Dashboard> {
 
   Widget dashboardBody() {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.topRight,
           colors: [
-            Color.fromRGBO(255, 74, 20, 1.0),
-            Color.fromRGBO(255, 159, 36, 1.0)
+            gradiant_2,
+            gradiant_1
           ], // สีเริ่มต้นและสีสุดท้ายของ Gradient
         ),
       ),
@@ -81,13 +79,33 @@ class _DashboardState extends State<Dashboard> {
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 80, 0, 0),
           child: ClipOval(
-            child: Image.network(
-              'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-              width: 65,
-              height: 65,
-              fit: BoxFit.cover,
-            ),
-          ),
+              child: (profilesdata['auth_users']['Roll'] == "Student")
+                  ? Image.network(
+                      '${dotenv.env['Image_API']}/${profilesdata['StudentID']}/${profilesdata['StudentID']}_imageprofile',
+                      width: 65,
+                      height: 65,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'assets/images/Profile.png', // รูปภาพที่ต้องการแสดงเมื่อเกิด error
+                        width: 65,
+                        height: 65,
+                        fit: BoxFit.cover,
+                      );
+                    })
+                  : Image.network(
+                      '${dotenv.env['Image_API']}/${profilesdata['id']}/${profilesdata['id']}_imageprofile',
+                      width: 65,
+                      height: 65,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'assets/images/Profile.png', // รูปภาพที่ต้องการแสดงเมื่อเกิด error
+                        width: 65,
+                        height: 65,
+                        fit: BoxFit.cover,
+                      );
+                    })),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(300, 80, 0, 0),
@@ -110,7 +128,7 @@ class _DashboardState extends State<Dashboard> {
         Padding(
           padding: const EdgeInsets.fromLTRB(90, 100, 0, 0),
           child: Text(
-            '${profilesData['FirstName']} ${profilesData['LastName']}',
+            '${profilesdata['FirstName']} ${profilesdata['LastName']}',
             style: const TextStyle(fontSize: 18),
           ),
         ),
@@ -145,7 +163,7 @@ class _DashboardState extends State<Dashboard> {
         ),
         Padding(
             padding: const EdgeInsets.fromLTRB(20, 350, 0, 0),
-            child: (profilesData['auth_users']['Roll'] == 'Student')
+            child: (profilesdata['auth_users']['Roll'] == 'Student')
                 ? const Text('ตารางเรียน',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
                 : const Text('ตารางสอน',
@@ -153,34 +171,35 @@ class _DashboardState extends State<Dashboard> {
                         TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 380, 0, 0),
-          child: (profilesData['auth_users']['Roll'] == 'Student')
+          child: (profilesdata['auth_users']['Roll'] == 'Student')
               ? FutureBuilder<List<Map<String, dynamic>>>(
                   future: fetchAttendence(),
                   builder: (context, snapshot) {
-                    print(profilesData['auth_users']['Roll']);
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const CircularProgressIndicator();
                     } else if (snapshot.hasError) {
                       return Text('Error: ${snapshot.error}');
                     } else {
                       return Schedule(
-                        title: '${profilesData['auth_users']['Roll']}',
+                        title: '${profilesdata['auth_users']['Roll']}',
                         todos: snapshot.data!,
+                        profilesData: profilesdata,
                       );
                     }
                   })
               : FutureBuilder<List<Map<String, dynamic>>>(
                   future: fetchprofessorClass(),
                   builder: (context, snapshot) {
-                    print(profilesData['auth_users']['Roll']);
+                    print(profilesdata['auth_users']['Roll']);
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const CircularProgressIndicator();
                     } else if (snapshot.hasError) {
                       return Text('Error: ${snapshot.error}');
                     } else {
                       return Schedule(
-                        title: '${profilesData['auth_users']['Roll']}',
+                        title: '${profilesdata['auth_users']['Roll']}',
                         todos: snapshot.data!,
+                        profilesData: profilesdata,
                       );
                     }
                   }),
@@ -199,7 +218,7 @@ class _DashboardState extends State<Dashboard> {
           builder: (context) => const ExitConfirmationDialog(),
         );
         // คืนค่า true หากต้องการออก และ false หากต้องการยกเลิก
-        return exit ?? false;
+        return exit;
       },
       child: Scaffold(
           bottomNavigationBar: NavigationBar(
@@ -209,24 +228,33 @@ class _DashboardState extends State<Dashboard> {
                 currentPageIndex = index;
               });
             },
-            labelBehavior: null,
-            indicatorColor: Colors.amber,
+            labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+            indicatorColor: HexColor('874CCC'),
             selectedIndex: currentPageIndex,
             destinations: const <Widget>[
               NavigationDestination(
-                selectedIcon: Icon(Icons.home),
+                selectedIcon: Icon(
+                  Icons.home,
+                  color: Colors.white,
+                ),
                 icon: Icon(Icons.home_outlined),
                 label: '',
               ),
               NavigationDestination(
-                icon: Badge(child: Icon(Icons.notifications_sharp)),
+                selectedIcon: Icon(
+                  Icons.person_2,
+                  color: Colors.white,
+                ),
+                icon: Icon(
+                  Icons.person_2,
+                ),
                 label: '',
               ),
             ],
           ),
           body: <Widget>[
             dashboardBody(),
-            ProfilePage(profilesData: profilesData)
+            ProfilePage(profilesData: profilesdata)
           ][currentPageIndex]),
     );
   }

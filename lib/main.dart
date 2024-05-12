@@ -6,10 +6,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:senior_project/Auth/Login_Page.dart';
 import 'package:senior_project/Auth/Login_with_PIN.dart';
+import 'package:senior_project/model/utils/colors_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 List<CameraDescription>? cameras;
+HexColor gradiant_1 = HexColor('ffc0cb');
+HexColor gradiant_2 = HexColor('#800080');
+HexColor grey = HexColor('F8F8F8');
 
 Future<bool> isTokenAvailable() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -24,20 +28,21 @@ Future<bool> isTokenExpired() async {
     Map<String, dynamic> tokenMap = json.decode(token);
     String accessToken = tokenMap['access_token'];
     String apiUrl = '${dotenv.env['API_LINK']}/users/me';
-    final response = await http.get(
-      Uri.parse(apiUrl),
-      headers: {'Authorization': 'Bearer $accessToken'},
-    );
-    if (response.statusCode != 200) {
-      print('token is Expired');
+    try {
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode != 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
       return true;
-    } else {
-      print('token is not Expired');
-      return false;
     }
   } else {
     // กรณีที่ token เป็น null
-    print('Token is null');
     return true;
   }
 }
@@ -69,7 +74,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Modlink Demo',
+      title: 'ModNerd',
       theme: ThemeData(fontFamily: 'Kanit'),
       home: initialScreen,
     );

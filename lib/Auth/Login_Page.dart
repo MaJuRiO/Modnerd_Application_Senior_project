@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:senior_project/Auth/Login_with_mail.dart';
-import 'package:senior_project/model/camera.dart';
+import 'package:senior_project/main.dart';
+import 'package:senior_project/model/RecognitionCam.dart';
+import 'package:senior_project/model/utils/colors_util.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -10,13 +12,13 @@ class LoginScreen extends StatelessWidget {
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.center,
               end: Alignment.topCenter,
               colors: [
-                Color.fromRGBO(255, 74, 20, 1.0),
-                Color.fromRGBO(255, 159, 36, 1.0)
+                gradiant_1,
+                gradiant_2,
               ], // สีเริ่มต้นและสีสุดท้ายของ Gradient
             ),
           ),
@@ -27,7 +29,7 @@ class LoginScreen extends StatelessWidget {
                 child: Align(
                     alignment: Alignment.topCenter,
                     child: Text(
-                      "MODLINK",
+                      "MODNERD",
                       style: TextStyle(fontSize: 48, color: Colors.white),
                     )),
               ),
@@ -57,9 +59,9 @@ class LoginScreen extends StatelessWidget {
                           width: 300,
                           height: 44,
                           decoration: BoxDecoration(
-                              gradient: const LinearGradient(colors: [
-                                Color.fromRGBO(255, 159, 36, 1.0),
-                                Color.fromRGBO(255, 74, 20, 1.0)
+                              gradient: LinearGradient(colors: [
+                                gradiant_1,
+                                gradiant_2,
                               ]),
                               borderRadius: BorderRadius.circular(20.0)),
                           child: ElevatedButton(
@@ -68,7 +70,7 @@ class LoginScreen extends StatelessWidget {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          const CameraScreen()));
+                                          RecogCameraScreen(cameras!)));
                             },
                             style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.transparent,
@@ -85,9 +87,9 @@ class LoginScreen extends StatelessWidget {
                         width: 300,
                         height: 44,
                         decoration: BoxDecoration(
-                            gradient: const LinearGradient(colors: [
-                              Color.fromRGBO(255, 159, 36, 1.0),
-                              Color.fromRGBO(255, 74, 20, 1.0)
+                            gradient: LinearGradient(colors: [
+                              gradiant_1,
+                              gradiant_2,
                             ]),
                             borderRadius: BorderRadius.circular(20.0)),
                         child: ElevatedButton(
@@ -101,7 +103,7 @@ class LoginScreen extends StatelessWidget {
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent),
                           child: const Text(
-                            'เข้าสู่ระบบด้วยบัญชี มจธ.',
+                            'เข้าสู่ระบบด้วย Email',
                             style: TextStyle(fontSize: 16, color: Colors.white),
                           ),
                         ),
@@ -112,12 +114,12 @@ class LoginScreen extends StatelessWidget {
               ),
               const Center(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(0, 250, 0, 0),
+                  padding: EdgeInsets.fromLTRB(0, 220, 0, 0),
                   child: Image(
                     image: AssetImage(
-                        'assets/images/Ant_Emoji.png'), // เปลี่ยนเป็นที่อยู่ของรูปภาพที่คุณต้องการแสดง
-                    width: 250, // กำหนดความกว้างของรูปภาพ
-                    height: 200, // กำหนดความสูงของรูปภาพ
+                        'assets/images/ant_v5.png'), // เปลี่ยนเป็นที่อยู่ของรูปภาพที่คุณต้องการแสดง
+                    width: 480 / 2, // กำหนดความกว้างของรูปภาพ
+                    height: 560 / 2, // กำหนดความสูงของรูปภาพ
                   ),
                 ),
               ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:senior_project/Auth/Login_with_PIN.dart';
-import 'package:senior_project/dashboardPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -18,30 +17,58 @@ class _MailAuthState extends State<MailAuth> {
 
   bool loginFailed = false;
 
-  Future<void> _login() async {
+  Future<void> _login(BuildContext context) async {
     // อ่านค่า username และ password จาก text controller
     String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
     // URL ของ API สำหรับการ login
     String apiUrl = '${dotenv.env['API_LINK']}/token';
-
-    final response = await http.post(
-      Uri.parse(apiUrl),
-      body: {"username": username, "password": password},
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return const Stack(
+            children: [Center(child: CircularProgressIndicator())]);
+      },
+      barrierDismissible: false,
     );
-    if (response.statusCode == 200) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('token', response.body);
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        body: {"username": username, "password": password},
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      );
+      Navigator.of(context).pop();
+      if (response.statusCode == 200) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('token', response.body);
 
-      Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return const PinAuth();
-      }));
-      if (!context.mounted) return;
-    } else {
-      setState(() {
-        loginFailed = true;
-      });
+        Navigator.push(context, MaterialPageRoute(builder: (context) {
+          return const PinAuth();
+        }));
+        if (!context.mounted) return;
+      } else {
+        setState(() {
+          loginFailed = true;
+        });
+      }
+    } catch (e) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('เกิดข้อผิดพลาด'),
+            content: const Text('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('ตกลง'),
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 
@@ -74,7 +101,9 @@ class _MailAuthState extends State<MailAuth> {
               ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _login,
+              onPressed: () {
+                _login(context);
+              },
               child: const Text('Login'),
             ),
           ],
