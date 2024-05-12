@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:screenshot/screenshot.dart';
 import 'package:senior_project/Auth/Login_with_PIN.dart';
 
@@ -25,7 +24,7 @@ class _RecogCameraScreenState extends State<RecogCameraScreen> {
   @override
   void initState() {
     super.initState();
-    controller = CameraController(widget.cameras[0], ResolutionPreset.max);
+    controller = CameraController(widget.cameras[1], ResolutionPreset.max);
     controller.initialize().then(
       (_) {
         if (!mounted) {

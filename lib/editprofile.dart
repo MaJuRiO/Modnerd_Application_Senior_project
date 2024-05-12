@@ -102,202 +102,205 @@ class ProfileDetail extends StatelessWidget {
           ),
         ),
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.topRight,
-            colors: [
-              gradiant_2,
-              gradiant_1
-            ], // สีเริ่มต้นและสีสุดท้ายของ Gradient
+      body: SingleChildScrollView(
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.topRight,
+              colors: [
+                gradiant_2,
+                gradiant_1
+              ], // สีเริ่มต้นและสีสุดท้ายของ Gradient
+            ),
           ),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height - 80,
-              decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(25),
-                    topRight: Radius.circular(25),
-                  )),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'ข้อมูลของฉัน',
-                              style: TextStyle(fontSize: 32),
-                            ),
-                            Text(
-                              'รายละเอียดข้อมูล',
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                        GestureDetector(
-                          child: ClipOval(
-                              child: (profiledata['auth_users']['Roll'] ==
-                                      "Student")
-                                  ? Image.network(
-                                      '${dotenv.env['Image_API']}/${profiledata['StudentID']}/${profiledata['StudentID']}_imageprofile',
-                                      width: 100,
-                                      height: 100,
-                                      fit: BoxFit.cover, errorBuilder:
-                                          (context, error, stackTrace) {
-                                      return Image.asset(
-                                        'assets/images/Profile.png', // รูปภาพที่ต้องการแสดงเมื่อเกิด error
-                                        width: 100,
-                                        height: 100,
-                                        fit: BoxFit.cover,
-                                      );
-                                    })
-                                  : Image.network(
-                                      '${dotenv.env['Image_API']}/${profiledata['id']}/${profiledata['id']}_imageprofile',
-                                      width: 100,
-                                      height: 100,
-                                      fit: BoxFit.cover, errorBuilder:
-                                          (context, error, stackTrace) {
-                                      return Image.asset(
-                                        'assets/images/Profile.png', // รูปภาพที่ต้องการแสดงเมื่อเกิด error
-                                        width: 100,
-                                        height: 100,
-                                        fit: BoxFit.cover,
-                                      );
-                                    })),
-                          onTap: () {
-                            _showSelectionDialog(context);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    height: MediaQuery.of(context).size.height * 0.4,
-                    width: MediaQuery.of(context).size.width,
-                    color: grey,
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            children: [
+              Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height - 80,
+                decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(25),
+                      topRight: Radius.circular(25),
+                    )),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          if (profiledata['StudentID'] == "Student")
-                            Text(
-                              profiledata['StudentID'],
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          Text(
-                            '${profiledata['FirstName']} ${profiledata['LastName']}',
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          if (profiledata['StudentID'] == "Student")
-                            Text(
-                              profiledata['FacultyName'],
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          if (profiledata['StudentID'] == "Student")
-                            Text(
-                              profiledata['Department'],
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          const SizedBox(
-                            height: 30,
-                          ),
-                          const Divider(
-                            height: 0,
-                            indent: 10,
-                            endIndent: 10,
-                          ),
-                          const SizedBox(
-                            height: 30,
-                          ),
-                          if (profiledata['StudentID'] == "Student")
-                            Text(
-                              'นักศีกษาชั้นปี ${profiledata['Year']}',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          if (profiledata['StudentID'] == "Student")
-                            if (profiledata['Degree'] == 'Bachelor')
-                              const Text('ระดับปริญญาตรี',
-                                  style: TextStyle(fontSize: 16)),
-                          if (profiledata['StudentID'] == "Student")
-                            if (profiledata['Degree'] == 'Master')
-                              const Text('ระดับปริญญาโท',
-                                  style: TextStyle(fontSize: 16)),
-                          if (profiledata['StudentID'] == "Student")
-                            if (profiledata['Degree'] == 'PhD')
-                              const Text('ระดับปริญญาเอก',
-                                  style: TextStyle(fontSize: 16))
-                        ],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'ข้อมูลติดต่อ',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Row(
-                                children: [
-                                  Icon(Icons.mail_outline),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    'อีเมล',
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                ],
+                              Text(
+                                'ข้อมูลของฉัน',
+                                style: TextStyle(fontSize: 32),
                               ),
                               Text(
-                                profiledata['Email'],
-                                style: const TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
+                                'รายละเอียดข้อมูล',
+                                style:
+                                    TextStyle(fontSize: 16, color: Colors.grey),
                               ),
                             ],
-                          )
+                          ),
+                          GestureDetector(
+                            child: ClipOval(
+                                child: (profiledata['auth_users']['Roll'] ==
+                                        "Student")
+                                    ? Image.network(
+                                        '${dotenv.env['Image_API']}/${profiledata['StudentID']}/${profiledata['StudentID']}_imageprofile',
+                                        width: 100,
+                                        height: 100,
+                                        fit: BoxFit.cover, errorBuilder:
+                                            (context, error, stackTrace) {
+                                        return Image.asset(
+                                          'assets/images/Profile.png', // รูปภาพที่ต้องการแสดงเมื่อเกิด error
+                                          width: 100,
+                                          height: 100,
+                                          fit: BoxFit.cover,
+                                        );
+                                      })
+                                    : Image.network(
+                                        '${dotenv.env['Image_API']}/${profiledata['id']}/${profiledata['id']}_imageprofile',
+                                        width: 100,
+                                        height: 100,
+                                        fit: BoxFit.cover, errorBuilder:
+                                            (context, error, stackTrace) {
+                                        return Image.asset(
+                                          'assets/images/Profile.png', // รูปภาพที่ต้องการแสดงเมื่อเกิด error
+                                          width: 100,
+                                          height: 100,
+                                          fit: BoxFit.cover,
+                                        );
+                                      })),
+                            onTap: () {
+                              _showSelectionDialog(context);
+                            },
+                          ),
                         ],
                       ),
                     ),
-                  )
-                ],
+                    Container(
+                      height: MediaQuery.of(context).size.height * 0.4,
+                      width: MediaQuery.of(context).size.width,
+                      color: grey,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (profiledata['StudentID'] == "Student")
+                              Text(
+                                profiledata['StudentID'],
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            Text(
+                              '${profiledata['FirstName']} ${profiledata['LastName']}',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            if (profiledata['StudentID'] == "Student")
+                              Text(
+                                profiledata['FacultyName'],
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            if (profiledata['StudentID'] == "Student")
+                              Text(
+                                profiledata['Department'],
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            const SizedBox(
+                              height: 30,
+                            ),
+                            const Divider(
+                              height: 0,
+                              indent: 10,
+                              endIndent: 10,
+                            ),
+                            const SizedBox(
+                              height: 30,
+                            ),
+                            if (profiledata['StudentID'] == "Student")
+                              Text(
+                                'นักศีกษาชั้นปี ${profiledata['Year']}',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            if (profiledata['StudentID'] == "Student")
+                              if (profiledata['Degree'] == 'Bachelor')
+                                const Text('ระดับปริญญาตรี',
+                                    style: TextStyle(fontSize: 16)),
+                            if (profiledata['StudentID'] == "Student")
+                              if (profiledata['Degree'] == 'Master')
+                                const Text('ระดับปริญญาโท',
+                                    style: TextStyle(fontSize: 16)),
+                            if (profiledata['StudentID'] == "Student")
+                              if (profiledata['Degree'] == 'PhD')
+                                const Text('ระดับปริญญาเอก',
+                                    style: TextStyle(fontSize: 16))
+                          ],
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'ข้อมูลติดต่อ',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Row(
+                                  children: [
+                                    Icon(Icons.mail_outline),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      'อีเมล',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ],
+                                ),
+                                Text(
+                                  profiledata['Email'],
+                                  style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

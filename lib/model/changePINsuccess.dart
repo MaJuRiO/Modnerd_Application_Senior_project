@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:senior_project/main.dart';
 
 class Change_Pin_Success extends StatelessWidget {
   const Change_Pin_Success({super.key});
@@ -10,13 +11,13 @@ class Change_Pin_Success extends StatelessWidget {
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         alignment: Alignment.bottomCenter,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.topRight,
             colors: [
-              Color.fromRGBO(255, 74, 20, 1.0),
-              Color.fromRGBO(255, 159, 36, 1.0)
+              gradiant_2,
+              gradiant_1
             ], // สีเริ่มต้นและสีสุดท้ายของ Gradient
           ),
         ),
