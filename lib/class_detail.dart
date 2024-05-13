@@ -8,8 +8,8 @@ import 'package:senior_project/main.dart';
 import 'package:senior_project/model/utils/colors_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Class_Detail extends StatelessWidget {
-  Class_Detail(
+class ClassDetail extends StatelessWidget {
+  ClassDetail(
       {super.key, required this.attendenceDetail, required this.profilesData});
 
   final Map<String, dynamic> attendenceDetail;
@@ -21,7 +21,6 @@ class Class_Detail extends StatelessWidget {
   }
 
   Future<void> checkinClass(String code, BuildContext context) async {
-    print(attendenceDetail);
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
     Map<String, dynamic> tokenMap = json.decode(token!);
@@ -44,14 +43,14 @@ class Class_Detail extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Succes'),
-            content: Text('สำเร็จ'),
+            title: const Text('Succes'),
+            content: const Text('สำเร็จ'),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Text('Close'),
+                child: const Text('Close'),
               ),
             ],
           );
@@ -62,14 +61,14 @@ class Class_Detail extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Fail'),
-            content: Text('ผิดพลาด'),
+            title: const Text('Fail'),
+            content: const Text('ผิดพลาด'),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Text('Close'),
+                child: const Text('Close'),
               ),
             ],
           );

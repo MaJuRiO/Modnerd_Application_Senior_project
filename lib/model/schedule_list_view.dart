@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:senior_project/class_detail.dart';
 import 'package:senior_project/main.dart';
-import 'package:senior_project/model/Class_summary.dart';
+import 'package:senior_project/model/class_summary.dart';
 import 'utils/colors_util.dart';
 import 'utils/date_utils.dart' as date_util;
 
@@ -69,8 +69,6 @@ class _ScheduleState extends State<Schedule> {
       int.parse(endTimeSplit[1]),
       int.parse(endTimeSplit[2]),
     );
-
-    print(startTargetTime);
     // เปรียบเทียบเวลา
     if (DateTime.now().isAfter(startTargetTime) &&
         DateTime.now().isBefore(endTargetTime)) {
@@ -337,7 +335,7 @@ class _ScheduleState extends State<Schedule> {
                                                     context,
                                                     MaterialPageRoute(
                                                       builder: (context) =>
-                                                          Class_Detail(
+                                                          ClassDetail(
                                                         attendenceDetail:
                                                             widget.todos[index],
                                                         profilesData:

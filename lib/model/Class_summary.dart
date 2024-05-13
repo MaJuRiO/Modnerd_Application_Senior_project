@@ -125,7 +125,6 @@ class _ClassSummaryState extends State<ClassSummary> {
 
   @override
   Widget build(BuildContext context) {
-    print(studentsList.length);
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
