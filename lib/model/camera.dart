@@ -26,7 +26,7 @@ class _CameraScreenState extends State<CameraScreen> {
     WidgetsFlutterBinding.ensureInitialized();
     var cameras = await availableCameras();
     controller = CameraController(
-      cameras[1],
+      cameras[0],
       ResolutionPreset.max,
       enableAudio: false,
     );

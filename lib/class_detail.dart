@@ -1,10 +1,11 @@
 import 'dart:convert';
-
+import 'package:senior_project/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:senior_project/main.dart';
+import 'package:senior_project/model/checkin_class_cam.dart';
 import 'package:senior_project/model/utils/colors_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,7 +22,6 @@ class Class_Detail extends StatelessWidget {
   }
 
   Future<void> checkinClass(String code, BuildContext context) async {
-    print(attendenceDetail);
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
     Map<String, dynamic> tokenMap = json.decode(token!);
@@ -49,7 +49,11 @@ class Class_Detail extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const CheckinClassCam()));
+                  //Navigator.pop(context);
                 },
                 child: Text('Close'),
               ),

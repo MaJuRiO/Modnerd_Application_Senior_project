@@ -7,15 +7,15 @@ import 'package:http/http.dart' as http;
 import 'package:screenshot/screenshot.dart';
 import 'package:senior_project/Auth/Login_with_PIN.dart';
 
-class RecogCameraScreen extends StatefulWidget {
-  final List<CameraDescription> cameras;
-  const RecogCameraScreen(this.cameras, {super.key});
+class CheckinClassCam extends StatefulWidget {
+  const CheckinClassCam({super.key});
 
   @override
-  _RecogCameraScreenState createState() => _RecogCameraScreenState();
+  _CheckinClassCamState createState() => _CheckinClassCamState();
 }
 
-class _RecogCameraScreenState extends State<RecogCameraScreen> {
+class _CheckinClassCamState extends State<CheckinClassCam> {
+  List<CameraDescription>? cameras;
   late CameraController controller;
   final screenshotController = ScreenshotController();
   late Timer timer;
@@ -24,7 +24,7 @@ class _RecogCameraScreenState extends State<RecogCameraScreen> {
   @override
   void initState() {
     super.initState();
-    controller = CameraController(widget.cameras[0], ResolutionPreset.max);
+    controller = CameraController(cameras![1], ResolutionPreset.max);
     controller.initialize().then(
       (_) {
         if (!mounted) {
@@ -77,8 +77,7 @@ class _RecogCameraScreenState extends State<RecogCameraScreen> {
         isProcessing = true;
         timer.cancel();
       });
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => const PinAuth()));
+      Navigator.pop(context);
       print('Image uploaded successfully');
     } else {
       print('Failed to upload image. Error: ${response.statusCode}');
