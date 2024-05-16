@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:senior_project/Auth/Login_Page.dart';
-import 'package:senior_project/securityPage.dart';
+import 'package:senior_project/security_page.dart';
 
 class SettingsScreen extends StatelessWidget {
   final Map<String, dynamic> profiledata;

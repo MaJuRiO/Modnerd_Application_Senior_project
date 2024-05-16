@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -58,7 +57,7 @@ class _ChangePinState extends State<ChangePin> {
     } else {}
   }
 
-  Future<bool> changeypin(String enteredPin, String email) async {
+  Future<void> changepin(String enteredPin, String email) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
     // ตรวจสอบว่ามี token หรือไม่
@@ -78,13 +77,8 @@ class _ChangePinState extends State<ChangePin> {
         Navigator.push(context, MaterialPageRoute(builder: (context) {
           return const Change_Pin_Success();
         }));
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
+      } else {}
+    } else {}
   }
 
   Widget numButton(int number) {
@@ -110,7 +104,7 @@ class _ChangePinState extends State<ChangePin> {
                 enteredPin = '';
               }
               if (newPin1 == newPin2 && verified) {
-                changeypin(newPin2, widget.profiledata['Email']);
+                changepin(newPin2, widget.profiledata['Email']);
               }
             }
           });

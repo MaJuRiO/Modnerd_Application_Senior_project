@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:senior_project/Auth/Login_with_mail.dart';
 import 'package:senior_project/main.dart';
-import 'package:senior_project/model/RecognitionCam.dart';
+import 'package:senior_project/model/recognition_camera.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});

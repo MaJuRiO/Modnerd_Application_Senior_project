@@ -19,8 +19,8 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
   CameraController? controller;
   XFile? videoFile;
-  bool left_arrow = false;
-  bool right_arrow = false;
+  bool leftarrow = false;
+  bool rightarrow = false;
 
   Future<void> initializationCamera() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -195,12 +195,12 @@ class _CameraScreenState extends State<CameraScreen> {
               ),
             ),
           ),
-          if (left_arrow)
+          if (leftarrow)
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 500, 0, 0),
               child: Center(child: Image.asset('assets/images/left_arrow.png')),
             ),
-          if (right_arrow)
+          if (rightarrow)
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 500, 0, 0),
               child:
@@ -219,23 +219,23 @@ class _CameraScreenState extends State<CameraScreen> {
             onVideoRecordButtonPressed();
             await Future.delayed(const Duration(seconds: 5));
             setState(() {
-              left_arrow = true;
+              leftarrow = true;
             });
             await Future.delayed(const Duration(seconds: 5));
             setState(() {
-              left_arrow = false;
-              right_arrow = true;
+              leftarrow = false;
+              rightarrow = true;
             });
             await Future.delayed(const Duration(seconds: 5));
             setState(() {
-              right_arrow = false;
+              rightarrow = false;
             });
             onStopButtonPressed();
             showDialog(
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
-                  title: Text('บันทึกเรียบร้อย'),
+                  title: const Text('บันทึกเรียบร้อย'),
                   content: const Text(
                       'ทำการบันทึกใบหน้าที่ไม่สวมใส่หน้ากากอนามัยเรียบร้อย'),
                   actions: [

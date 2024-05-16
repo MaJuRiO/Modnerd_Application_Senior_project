@@ -1,15 +1,13 @@
-// ignore_for_file: avoid_print
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:senior_project/main.dart';
-import 'package:senior_project/model/ScheduleListView.dart';
+import 'package:senior_project/model/schedule_list_view.dart';
 import 'package:http/http.dart' as http;
 import 'package:senior_project/model/utils/colors_util.dart';
-import 'package:senior_project/profilePage.dart';
+import 'package:senior_project/profile_page.dart';
 
 class Dashboard extends StatefulWidget {
   final Map<String, dynamic> profiledata;
@@ -117,10 +115,7 @@ class _DashboardState extends State<Dashboard> {
             child: IconButton(
               icon: const Icon(Icons.circle_notifications_outlined),
               iconSize: 48,
-              onPressed: () {
-                // ทำอะไรสักอย่างเมื่อปุ่มถูกกด
-                print('Button pressed');
-              },
+              onPressed: () {},
               color: Colors.white,
             ),
           ),
@@ -190,7 +185,6 @@ class _DashboardState extends State<Dashboard> {
               : FutureBuilder<List<Map<String, dynamic>>>(
                   future: fetchprofessorClass(),
                   builder: (context, snapshot) {
-                    print(profilesdata['auth_users']['Roll']);
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const CircularProgressIndicator();
                     } else if (snapshot.hasError) {
