@@ -48,7 +48,8 @@ dependencies:
   fl_chart: ^0.67.0
   path_provider: ^2.1.3
   screenshot: ^2.3.0
-  
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

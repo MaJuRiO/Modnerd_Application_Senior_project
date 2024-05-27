@@ -106,21 +106,6 @@ class _DashboardState extends State<Dashboard> {
                     })),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(300, 80, 0, 0),
-          child: Ink(
-            decoration: const ShapeDecoration(
-              color: Colors.blue,
-              shape: CircleBorder(),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.circle_notifications_outlined),
-              iconSize: 48,
-              onPressed: () {},
-              color: Colors.white,
-            ),
-          ),
-        ),
-        Padding(
           padding: const EdgeInsets.fromLTRB(90, 100, 0, 0),
           child: Text(
             '${profilesdata['FirstName']} ${profilesdata['LastName']}',

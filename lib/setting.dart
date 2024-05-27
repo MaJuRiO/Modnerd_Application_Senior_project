@@ -36,32 +36,32 @@ class SettingsScreen extends StatelessWidget {
               })); // ปิดหน้าต่างการตั้งค่า
             },
           ),
-          const Divider(
-            height: 0,
-            indent: 20,
-            endIndent: 20,
-          ),
-          ListTile(
-            leading: const Icon(Icons.language),
-            title: const Text('เปลี่ยนภาษา'),
-            onTap: () {
-              // ทำสิ่งที่ต้องการเมื่อตัวเลือกถูกเลือก
-              Navigator.pop(context); // ปิดหน้าต่างการตั้งค่า
-            },
-          ),
-          const Divider(
-            height: 0,
-            indent: 20,
-            endIndent: 20,
-          ),
-          ListTile(
-            leading: const Icon(Icons.edit_document),
-            title: const Text('ข้อกำหนดและเงื่อนไข'),
-            onTap: () {
-              // ทำสิ่งที่ต้องการเมื่อตัวเลือกถูกเลือก
-              Navigator.pop(context); // ปิดหน้าต่างการตั้งค่า
-            },
-          ),
+          // const Divider(
+          //   height: 0,
+          //   indent: 20,
+          //   endIndent: 20,
+          // ),
+          // ListTile(
+          //   leading: const Icon(Icons.language),
+          //   title: const Text('เปลี่ยนภาษา'),
+          //   onTap: () {
+          //     // ทำสิ่งที่ต้องการเมื่อตัวเลือกถูกเลือก
+          //     Navigator.pop(context); // ปิดหน้าต่างการตั้งค่า
+          //   },
+          // ),
+          // const Divider(
+          //   height: 0,
+          //   indent: 20,
+          //   endIndent: 20,
+          // ),
+          // ListTile(
+          //   leading: const Icon(Icons.edit_document),
+          //   title: const Text('ข้อกำหนดและเงื่อนไข'),
+          //   onTap: () {
+          //     // ทำสิ่งที่ต้องการเมื่อตัวเลือกถูกเลือก
+          //     Navigator.pop(context); // ปิดหน้าต่างการตั้งค่า
+          //   },
+          // ),
           const Divider(
             height: 0,
             indent: 20,

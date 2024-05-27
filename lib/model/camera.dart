@@ -21,12 +21,18 @@ class _CameraScreenState extends State<CameraScreen> {
   XFile? videoFile;
   bool leftarrow = false;
   bool rightarrow = false;
+  bool unmasked = false;
+  bool masked = false;
+  int recordingCount = 0;
 
   Future<void> initializationCamera() async {
     WidgetsFlutterBinding.ensureInitialized();
     var cameras = await availableCameras();
+    final firstCamera = cameras.firstWhere(
+      (camera) => camera.lensDirection == CameraLensDirection.front,
+    );
     controller = CameraController(
-      cameras[0],
+      firstCamera,
       ResolutionPreset.max,
       enableAudio: false,
     );
@@ -80,9 +86,10 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
-  Future<void> _uploadVideo(String path) async {
+  Future<void> _uploadVideo(String path, String videoName) async {
     final File file = File(path);
-    final String newFileName = '${widget.profiledata['StudentID']}_face.mp4';
+    final String newFileName =
+        '${widget.profiledata['StudentID']}_$videoName.mp4';
     final String newPath = '${file.parent.path}/$newFileName';
 
     try {
@@ -133,7 +140,9 @@ class _CameraScreenState extends State<CameraScreen> {
         setState(() {});
       }
       if (file != null) {
-        _uploadVideo(file.path);
+        recordingCount++;
+        String videoName = recordingCount == 1 ? 'unmasked' : 'masked';
+        _uploadVideo(file.path, videoName);
         videoFile = file;
       }
     });
@@ -236,8 +245,11 @@ class _CameraScreenState extends State<CameraScreen> {
               builder: (BuildContext context) {
                 return AlertDialog(
                   title: const Text('บันทึกเรียบร้อย'),
-                  content: const Text(
-                      'ทำการบันทึกใบหน้าที่ไม่สวมใส่หน้ากากอนามัยเรียบร้อย'),
+                  content: Text(
+                    recordingCount == 0
+                        ? 'ทำการบันทึกใบหน้าที่ไม่สวมใส่หน้ากากอนามัยเรียบร้อย'
+                        : 'ทำการบันทึกใบหน้าที่สวมใส่หน้ากากอนามัยเรียบร้อย',
+                  ),
                   actions: [
                     TextButton(
                       onPressed: () {

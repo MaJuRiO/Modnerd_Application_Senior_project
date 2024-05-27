@@ -8,14 +8,14 @@ import 'package:screenshot/screenshot.dart';
 import 'package:senior_project/Auth/Login_with_PIN.dart';
 
 class CheckinClassCam extends StatefulWidget {
-  const CheckinClassCam({super.key});
+  final List<CameraDescription> cameras;
+  const CheckinClassCam(this.cameras, {super.key});
 
   @override
   _CheckinClassCamState createState() => _CheckinClassCamState();
 }
 
 class _CheckinClassCamState extends State<CheckinClassCam> {
-  List<CameraDescription>? cameras;
   late CameraController controller;
   final screenshotController = ScreenshotController();
   late Timer timer;
@@ -24,14 +24,17 @@ class _CheckinClassCamState extends State<CheckinClassCam> {
   @override
   void initState() {
     super.initState();
-    controller = CameraController(cameras![1], ResolutionPreset.max);
+    final firstCamera = widget.cameras.firstWhere(
+      (camera) => camera.lensDirection == CameraLensDirection.front,
+    );
+    controller = CameraController(firstCamera, ResolutionPreset.max);
     controller.initialize().then(
       (_) {
         if (!mounted) {
           return;
         }
         setState(() {});
-        if (controller.value.isInitialized && !isProcessing) {
+        if (controller!.value.isInitialized && !isProcessing) {
           timer = Timer.periodic(
             const Duration(seconds: 2),
             (Timer t) async {
@@ -53,7 +56,7 @@ class _CheckinClassCamState extends State<CheckinClassCam> {
 
   @override
   void dispose() {
-    controller.dispose();
+    controller!.dispose();
     timer.cancel();
     super.dispose();
   }
@@ -78,6 +81,7 @@ class _CheckinClassCamState extends State<CheckinClassCam> {
         timer.cancel();
       });
       Navigator.pop(context);
+      Navigator.pop(context);
       print('Image uploaded successfully');
     } else {
       print('Failed to upload image. Error: ${response.statusCode}');
@@ -86,21 +90,21 @@ class _CheckinClassCamState extends State<CheckinClassCam> {
 
   @override
   Widget build(BuildContext context) {
-    if (!controller.value.isInitialized) {
+    if (!controller!.value.isInitialized) {
       return Container();
     }
     return Screenshot(
       controller: screenshotController,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('เข้าสู่ระบบด้วยใบหน้า'),
+          title: const Text('ยืนยันตัวตนสำหรับเข้าเรียน'),
         ),
         body: Center(
           child: SizedBox(
             height: double.infinity,
             child: AspectRatio(
               aspectRatio: 3 / 4,
-              child: CameraPreview(controller),
+              child: CameraPreview(controller!),
             ),
           ),
         ),

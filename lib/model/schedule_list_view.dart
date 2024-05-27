@@ -321,6 +321,9 @@ class _ScheduleState extends State<Schedule> {
                                         ),
                                       ),
                                     ),
+                                    const SizedBox(
+                                      width: 10,
+                                    ),
                                     GestureDetector(
                                       onTap: isTimePassed(
                                               widget.todos[index]['Date'],
@@ -346,24 +349,34 @@ class _ScheduleState extends State<Schedule> {
                                             }
                                           : null,
                                       child: isTimePassed(
-                                              widget.todos[index]['Date'],
-                                              widget.todos[index]
-                                                      ['course_detail']
-                                                  ['start_time'],
-                                              widget.todos[index]
-                                                  ['course_detail']['end_time'])
+                                                  widget.todos[index]['Date'],
+                                                  widget.todos[index]
+                                                          ['course_detail']
+                                                      ['start_time'],
+                                                  widget.todos[index]
+                                                          ['course_detail']
+                                                      ['end_time']) &&
+                                              widget.todos[index]['Status'] ==
+                                                  "NotYet"
                                           ? Container(
                                               width: 90,
                                               decoration: BoxDecoration(
                                                   color: gradiant_1,
                                                   borderRadius:
-                                                      BorderRadius.circular(
-                                                          15)),
+                                                      BorderRadius.circular(15),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.black
+                                                          .withOpacity(0.2),
+                                                      spreadRadius: 1,
+                                                      blurRadius: 2,
+                                                      offset:
+                                                          const Offset(2, 3),
+                                                    )
+                                                  ]),
                                               child: const Center(
                                                 child: Padding(
                                                   padding: EdgeInsets.all(8.0),
-                                                  // child: Text(
-                                                  //     '${widget.todos[index]['Status']}'),
                                                   child: Text('เช็คชื่อ'),
                                                 ),
                                               ))
@@ -377,8 +390,6 @@ class _ScheduleState extends State<Schedule> {
                                               child: const Center(
                                                 child: Padding(
                                                   padding: EdgeInsets.all(8.0),
-                                                  // child: Text(
-                                                  //     '${widget.todos[index]['Status']}'),
                                                   child: Text('เช็คชื่อ'),
                                                 ),
                                               )),

@@ -120,7 +120,7 @@ class _ClassSummaryState extends State<ClassSummary> {
     if (studentsList.isEmpty) {
       return 0.0; // ป้องกันการหารด้วยศูนย์
     }
-    return (current / studentsList.length) * 100;
+    return ((current / studentsList.length) * 100).roundToDouble();
   }
 
   @override
@@ -188,7 +188,7 @@ class _ClassSummaryState extends State<ClassSummary> {
                             builder: (BuildContext context) {
                               return AlertDialog(
                                 title: const Text(
-                                  'Course Code',
+                                  'Class Code',
                                   style: TextStyle(color: Colors.black54),
                                 ),
                                 content: SizedBox(
@@ -336,27 +336,24 @@ class _ClassSummaryState extends State<ClassSummary> {
                   ),
                 ),
                 SizedBox(
-                  height: 200,
+                  height: MediaQuery.of(context).size.height * 0.3,
                   child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: DataTable(
-                        columns: const <DataColumn>[
-                          DataColumn(label: Text('Name')),
-                          DataColumn(label: Text('StudentID')),
-                          DataColumn(label: Text('Status')),
-                        ],
-                        rows: studentsList
-                            .map((e) => DataRow(cells: [
-                                  DataCell(Text(e["student"]['FirstName'] +
-                                      " " +
-                                      e["student"]['LastName'])),
-                                  DataCell(Text(e['StudentID'])),
-                                  DataCell(Text(e['Status']))
-                                ]))
-                            .toList(),
-                      ),
+                    scrollDirection: Axis.vertical,
+                    child: DataTable(
+                      columns: const <DataColumn>[
+                        DataColumn(label: Text('Name')),
+                        DataColumn(label: Text('StudentID')),
+                        DataColumn(label: Text('Status')),
+                      ],
+                      rows: studentsList
+                          .map((e) => DataRow(cells: [
+                                DataCell(Text(e["student"]['FirstName'] +
+                                    " " +
+                                    e["student"]['LastName'])),
+                                DataCell(Text(e['StudentID'])),
+                                DataCell(Text(e['Status']))
+                              ]))
+                          .toList(),
                     ),
                   ),
                 )

@@ -191,7 +191,7 @@ class ProfileDetail extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (profiledata['StudentID'] == "Student")
+                            if (profiledata['auth_users']['Roll'] == "Student")
                               Text(
                                 profiledata['StudentID'],
                                 style: const TextStyle(fontSize: 16),
@@ -201,20 +201,20 @@ class ProfileDetail extends StatelessWidget {
                             ),
                             Text(
                               '${profiledata['FirstName']} ${profiledata['LastName']}',
-                              style: const TextStyle(fontSize: 16),
+                              style: const TextStyle(fontSize: 18),
                             ),
                             const SizedBox(
                               height: 20,
                             ),
-                            if (profiledata['StudentID'] == "Student")
+                            if (profiledata['auth_users']['Roll'] == "Student")
                               Text(
-                                profiledata['FacultyName'],
+                                '${profiledata['FacultyName']}',
                                 style: const TextStyle(fontSize: 16),
                               ),
                             const SizedBox(
                               height: 10,
                             ),
-                            if (profiledata['StudentID'] == "Student")
+                            if (profiledata['auth_users']['Roll'] == "Student")
                               Text(
                                 profiledata['Department'],
                                 style: const TextStyle(fontSize: 16),
@@ -230,7 +230,7 @@ class ProfileDetail extends StatelessWidget {
                             const SizedBox(
                               height: 30,
                             ),
-                            if (profiledata['StudentID'] == "Student")
+                            if (profiledata['auth_users']['Roll'] == "Student")
                               Text(
                                 'นักศีกษาชั้นปี ${profiledata['Year']}',
                                 style: const TextStyle(fontSize: 16),
@@ -238,15 +238,15 @@ class ProfileDetail extends StatelessWidget {
                             const SizedBox(
                               height: 20,
                             ),
-                            if (profiledata['StudentID'] == "Student")
+                            if (profiledata['auth_users']['Roll'] == "Student")
                               if (profiledata['Degree'] == 'Bachelor')
                                 const Text('ระดับปริญญาตรี',
                                     style: TextStyle(fontSize: 16)),
-                            if (profiledata['StudentID'] == "Student")
+                            if (profiledata['auth_users']['Roll'] == "Student")
                               if (profiledata['Degree'] == 'Master')
                                 const Text('ระดับปริญญาโท',
                                     style: TextStyle(fontSize: 16)),
-                            if (profiledata['StudentID'] == "Student")
+                            if (profiledata['auth_users']['Roll'] == "Student")
                               if (profiledata['Degree'] == 'PhD')
                                 const Text('ระดับปริญญาเอก',
                                     style: TextStyle(fontSize: 16))

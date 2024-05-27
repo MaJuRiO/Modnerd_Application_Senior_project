@@ -12,7 +12,7 @@ class RecogCameraScreen extends StatefulWidget {
   const RecogCameraScreen(this.cameras, {super.key});
 
   @override
-  _RecogCameraScreenState createState() => _RecogCameraScreenState();
+  State<RecogCameraScreen> createState() => _RecogCameraScreenState();
 }
 
 class _RecogCameraScreenState extends State<RecogCameraScreen> {
@@ -24,7 +24,11 @@ class _RecogCameraScreenState extends State<RecogCameraScreen> {
   @override
   void initState() {
     super.initState();
-    controller = CameraController(widget.cameras[0], ResolutionPreset.max);
+    final firstCamera = widget.cameras.firstWhere(
+      (camera) => camera.lensDirection == CameraLensDirection.front,
+    );
+    controller =
+        CameraController(firstCamera, ResolutionPreset.max, enableAudio: false);
     controller.initialize().then(
       (_) {
         if (!mounted) {
@@ -60,7 +64,6 @@ class _RecogCameraScreenState extends State<RecogCameraScreen> {
 
   Future<void> sendImage(Uint8List? imageBytes) async {
     // แปลงรูปภาพเป็น base64
-    //String base64Image = base64Encode(image!);
     final request = http.MultipartRequest(
         'POST', Uri.parse('${dotenv.env['API_LINK']}/face_rocognition_login'));
     // ส่งรูปภาพผ่าน API
@@ -87,6 +90,7 @@ class _RecogCameraScreenState extends State<RecogCameraScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print(widget.cameras);
     if (!controller.value.isInitialized) {
       return Container();
     }
