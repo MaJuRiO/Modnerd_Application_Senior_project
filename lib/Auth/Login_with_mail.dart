@@ -37,14 +37,17 @@ class _MailAuthState extends State<MailAuth> {
         body: {"username": username, "password": password},
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       );
-      Navigator.of(context).pop();
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
       if (response.statusCode == 200) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setString('token', response.body);
-
-        Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return const PinAuth();
-        }));
+        if (mounted) {
+          Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return const PinAuth();
+          }));
+        }
         if (!context.mounted) return;
       } else {
         setState(() {
@@ -52,23 +55,25 @@ class _MailAuthState extends State<MailAuth> {
         });
       }
     } catch (e) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('เกิดข้อผิดพลาด'),
-            content: const Text('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('ตกลง'),
-              ),
-            ],
-          );
-        },
-      );
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('เกิดข้อผิดพลาด'),
+              content: const Text('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('ตกลง'),
+                ),
+              ],
+            );
+          },
+        );
+      }
     }
   }
 

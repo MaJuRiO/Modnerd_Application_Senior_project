@@ -5,16 +5,22 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:senior_project/main.dart';
-import 'package:senior_project/model/checkin_class_cam.dart';
+import 'package:senior_project/Student/checkin_class_cam.dart';
 import 'package:senior_project/model/utils/colors_util.dart';
 
-class ClassDetail extends StatelessWidget {
+class ClassDetail extends StatefulWidget {
   ClassDetail(
       {super.key, required this.attendenceDetail, required this.profilesData});
 
   final Map<String, dynamic> attendenceDetail;
   final Map<String, dynamic> profilesData;
-  TextEditingController textController = TextEditingController();
+
+  @override
+  State<ClassDetail> createState() => _ClassDetailState();
+}
+
+class _ClassDetailState extends State<ClassDetail> {
+  final TextEditingController textController = TextEditingController();
 
   // Function to format time by removing seconds
   String formatTimeWithoutSeconds(String time) {
@@ -22,8 +28,7 @@ class ClassDetail extends StatelessWidget {
     return DateFormat.Hm().format(timeHMS);
   }
 
-  // Function to handle class check-in
-  Future<void> checkinClass(String code, BuildContext context) async {
+  Future<void> checkinClass(String code) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
     Map<String, dynamic> tokenMap = json.decode(token!);
@@ -35,64 +40,61 @@ class ClassDetail extends StatelessWidget {
         'Authorization': 'Bearer $accessToken'
       },
       body: jsonEncode({
-        "studentId": "${profilesData['StudentID']}",
-        "coursecode": "${attendenceDetail['Course_code']}",
+        "studentId": "${widget.profilesData['StudentID']}",
+        "coursecode": "${widget.attendenceDetail['Course_code']}",
         "code": code
       }),
     );
     if (response.statusCode == 200) {
-      _showdialogtrue(context);
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Success'),
+              content: const Text('สำเร็จ'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => CheckinClassCam(
+                                cameras!,
+                                coursecode:
+                                    widget.attendenceDetail['Course_code'],
+                                date: widget.attendenceDetail['Date'],
+                              )),
+                    );
+                  },
+                  child: const Text('Close'),
+                ),
+              ],
+            );
+          },
+        );
+      }
     } else {
-      try {
-        _showdialogfalse(context);
-      } catch (e) {
-        return;
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Fail'),
+              content: const Text('ผิดพลาด'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Close'),
+                ),
+              ],
+            );
+          },
+        );
       }
     }
-  }
-
-  void _showdialogtrue(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Success'),
-          content: const Text('สำเร็จ'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => CheckinClassCam(cameras!)),
-                );
-              },
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showdialogfalse(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Fail'),
-          content: const Text('ผิดพลาด'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   // Function to show dialog for entering class code
@@ -112,7 +114,7 @@ class ClassDetail extends StatelessWidget {
               child: const Text("OK"),
               onPressed: () async {
                 String enteredText = textController.text;
-                checkinClass(enteredText, context);
+                checkinClass(enteredText);
                 Navigator.of(context).pop();
                 textController.clear();
               },
@@ -131,7 +133,6 @@ class ClassDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(attendenceDetail);
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -185,11 +186,11 @@ class ClassDetail extends StatelessWidget {
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(7.0),
-                        child: Text(attendenceDetail['course_detail']
+                        child: Text(widget.attendenceDetail['course_detail']
                             ['recurrence_pattern']),
                       ),
                     ),
-                    if (attendenceDetail['Status'] == "Present")
+                    if (widget.attendenceDetail['Status'] == "Present")
                       Container(
                         decoration: BoxDecoration(
                           color: HexColor('7AE17C'),
@@ -201,7 +202,7 @@ class ClassDetail extends StatelessWidget {
                           child: Text("Present"),
                         ),
                       ),
-                    if (attendenceDetail['Status'] == "Late")
+                    if (widget.attendenceDetail['Status'] == "Late")
                       Container(
                         decoration: const BoxDecoration(
                           color: Colors.orange,
@@ -212,7 +213,7 @@ class ClassDetail extends StatelessWidget {
                           child: Text("Late"),
                         ),
                       ),
-                    if (attendenceDetail['Status'] == "NotYet")
+                    if (widget.attendenceDetail['Status'] == "NotYet")
                       Container(
                         decoration: BoxDecoration(
                           color: grey,
@@ -227,25 +228,25 @@ class ClassDetail extends StatelessWidget {
                   ],
                 ), // Display recurrence pattern
                 Text(
-                  '${formatTimeWithoutSeconds(attendenceDetail['course_detail']['start_time'])}-${formatTimeWithoutSeconds(attendenceDetail['course_detail']['end_time'])}',
+                  '${formatTimeWithoutSeconds(widget.attendenceDetail['course_detail']['start_time'])}-${formatTimeWithoutSeconds(widget.attendenceDetail['course_detail']['end_time'])}',
                   style: const TextStyle(fontSize: 14),
                 ), // Display start and end time
                 Text(
-                  '${attendenceDetail['Course_code']}',
+                  '${widget.attendenceDetail['Course_code']}',
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 20),
                 ), // Display course code
                 Text(
-                  '${attendenceDetail['course_detail']['CourseName']}',
+                  '${widget.attendenceDetail['course_detail']['CourseName']}',
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 20),
                 ), // Display course name
                 Text(
-                    '${attendenceDetail['course_detail']['room']}'), // Display room
+                    '${widget.attendenceDetail['course_detail']['room']}'), // Display room
 
                 SizedBox(
                   width: 370,
-                  child: attendenceDetail['Status'] == "NotYet"
+                  child: widget.attendenceDetail['Status'] == "NotYet"
                       ? ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             foregroundColor: Colors.black,

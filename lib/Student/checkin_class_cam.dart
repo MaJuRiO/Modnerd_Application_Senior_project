@@ -1,18 +1,22 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:screenshot/screenshot.dart';
-import 'package:senior_project/Auth/Login_with_PIN.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CheckinClassCam extends StatefulWidget {
   final List<CameraDescription> cameras;
-  const CheckinClassCam(this.cameras, {super.key});
+  final String coursecode;
+  final String date;
+  const CheckinClassCam(this.cameras,
+      {super.key, required this.coursecode, required this.date});
 
   @override
-  _CheckinClassCamState createState() => _CheckinClassCamState();
+  State<CheckinClassCam> createState() => _CheckinClassCamState();
 }
 
 class _CheckinClassCamState extends State<CheckinClassCam> {
@@ -34,7 +38,7 @@ class _CheckinClassCamState extends State<CheckinClassCam> {
           return;
         }
         setState(() {});
-        if (controller!.value.isInitialized && !isProcessing) {
+        if (controller.value.isInitialized && !isProcessing) {
           timer = Timer.periodic(
             const Duration(seconds: 2),
             (Timer t) async {
@@ -42,8 +46,6 @@ class _CheckinClassCamState extends State<CheckinClassCam> {
                 screenshotController
                     .capture()
                     .then((Uint8List? image) => {sendImage(image)});
-              } catch (e) {
-                print('Error sending image: $e');
               } finally {
                 isProcessing = false;
               }
@@ -56,16 +58,18 @@ class _CheckinClassCamState extends State<CheckinClassCam> {
 
   @override
   void dispose() {
-    controller!.dispose();
+    controller.dispose();
     timer.cancel();
     super.dispose();
   }
 
   Future<void> sendImage(Uint8List? imageBytes) async {
-    // แปลงรูปภาพเป็น base64
-    //String base64Image = base64Encode(image!);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    Map<String, dynamic> tokenMap = json.decode(token!);
+    String accessToken = tokenMap['access_token'];
     final request = http.MultipartRequest(
-        'POST', Uri.parse('${dotenv.env['API_LINK']}/face_rocognition_login'));
+        'POST', Uri.parse('${dotenv.env['API_LINK']}/Face_checkin'));
     // ส่งรูปภาพผ่าน API
     request.files.add(
       http.MultipartFile.fromBytes(
@@ -74,23 +78,50 @@ class _CheckinClassCamState extends State<CheckinClassCam> {
         filename: 'image.jpg',
       ),
     );
+    request.headers.addAll({
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer $accessToken'
+    });
     var response = await request.send();
     if (response.statusCode == 200) {
+      updateAttendence(widget.coursecode, widget.date);
       setState(() {
         isProcessing = true;
         timer.cancel();
       });
-      Navigator.pop(context);
-      Navigator.pop(context);
-      print('Image uploaded successfully');
+      if (mounted) {
+        Navigator.pop(context);
+        Navigator.pop(context);
+      }
+    } else {}
+  }
+
+  Future<void> updateAttendence(String courseCode, String date) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    Map<String, dynamic> tokenMap = json.decode(token!);
+    String accessToken = tokenMap['access_token'];
+    final response = await http.patch(
+      Uri.parse('${dotenv.env['API_LINK']}/attendance_checkin'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $accessToken'
+      },
+      body: jsonEncode({
+        "Course_code": courseCode,
+        "Date": date,
+      }),
+    );
+    if (response.statusCode == 200) {
+      return;
     } else {
-      print('Failed to upload image. Error: ${response.statusCode}');
+      return;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!controller!.value.isInitialized) {
+    if (!controller.value.isInitialized) {
       return Container();
     }
     return Screenshot(
@@ -98,13 +129,18 @@ class _CheckinClassCamState extends State<CheckinClassCam> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('ยืนยันตัวตนสำหรับเข้าเรียน'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () =>
+                {Navigator.of(context).pop(), Navigator.of(context).pop()},
+          ),
         ),
         body: Center(
           child: SizedBox(
             height: double.infinity,
             child: AspectRatio(
               aspectRatio: 3 / 4,
-              child: CameraPreview(controller!),
+              child: CameraPreview(controller),
             ),
           ),
         ),

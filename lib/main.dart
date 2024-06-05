@@ -3,8 +3,8 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:senior_project/Auth/Login_Page.dart';
-import 'package:senior_project/Auth/Login_with_PIN.dart';
+import 'package:senior_project/Auth/login_page.dart';
+import 'package:senior_project/Auth/login_with_pin.dart';
 import 'package:senior_project/model/utils/colors_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -24,10 +24,10 @@ Future<bool> isTokenExpired() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? token = prefs.getString('token');
   if (token != null) {
-    Map<String, dynamic> tokenMap = json.decode(token);
-    String accessToken = tokenMap['access_token'];
-    String apiUrl = '${dotenv.env['API_LINK']}/users/me';
     try {
+      Map<String, dynamic> tokenMap = json.decode(token);
+      String accessToken = tokenMap['access_token'];
+      String apiUrl = '${dotenv.env['API_LINK']}/users/me';
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {'Authorization': 'Bearer $accessToken'},
@@ -63,12 +63,12 @@ Future<void> main() async {
     initialScreen = const LoginScreen();
   }
 
-  runApp(MyApp(initialScreen: initialScreen));
+  runApp(ModNerd(initialScreen: initialScreen));
 }
 
-class MyApp extends StatelessWidget {
+class ModNerd extends StatelessWidget {
   final Widget initialScreen;
-  const MyApp({required this.initialScreen, Key? key}) : super(key: key);
+  const ModNerd({required this.initialScreen, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -38,11 +38,13 @@ class _PinAuthState extends State<PinAuth> {
       body: json.encode({"pin": enteredPin}),
     );
     if (response.statusCode == 200) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return Dashboard(
-          profiledata: profilesData,
-        );
-      }));
+      if (mounted) {
+        Navigator.push(context, MaterialPageRoute(builder: (context) {
+          return Dashboard(
+            profiledata: profilesData,
+          );
+        }));
+      }
       setState(() {
         enteredPin = '';
       });

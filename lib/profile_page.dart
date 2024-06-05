@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:senior_project/Teacher/List_course.dart';
+import 'package:senior_project/Teacher/list_course.dart';
 import 'package:senior_project/editprofile.dart';
 import 'package:senior_project/main.dart';
 import 'package:senior_project/setting.dart';
@@ -164,12 +163,14 @@ class ProfilePage extends StatelessWidget {
                           ],
                         ),
                       ),
-                    SizedBox(
-                      height: height * 0.6,
-                      child: CourseList(
-                        profiledata: profilesData,
-                      ),
-                    )
+                    profilesData['auth_users']['Roll'] != "Student"
+                        ? SizedBox(
+                            height: height * 0.6,
+                            child: CourseList(
+                              profiledata: profilesData,
+                            ),
+                          )
+                        : const SizedBox.shrink()
                   ],
                 ),
               ),

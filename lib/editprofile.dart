@@ -9,48 +9,68 @@ class ProfileDetail extends StatelessWidget {
 
   const ProfileDetail({super.key, required this.profiledata});
 
-  Future<void> _getImage(ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedFile =
-        await picker.pickImage(source: source, imageQuality: 100);
-
-    if (pickedFile != null) {
-      String id;
-      if (profiledata['auth_users']['Roll'] == "Student") {
-        id = profiledata['StudentID'];
-      } else if (profiledata['auth_users']['Roll'] == "Teacher") {
-        id = profiledata['id'];
+  @override
+  Widget build(BuildContext context) {
+    Future<void> uploadImage(String imagePath, String id) async {
+      var request = http.MultipartRequest(
+          'POST', Uri.parse('${dotenv.env['API_LINK']}/upload/image/?Id=$id'));
+      request.files.add(await http.MultipartFile.fromPath('image', imagePath));
+      var response = await request.send();
+      if (response.statusCode == 200) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('สำเร็จ'),
+            content: const Text('เปลี่ยนรูปภาพโปรไฟล์สำเร็จ'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('ปิด'),
+              ),
+            ],
+          ),
+        );
       } else {
-        throw Exception('Roll is not defined');
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Error'),
+            content: const Text('Failed to upload image'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('ปิด'),
+              ),
+            ],
+          ),
+        );
       }
-      // Upload the image through API
-      await _uploadImage(pickedFile.path, id);
     }
-  }
 
-  Future<void> _uploadImage(String imagePath, String id) async {
-    var request = http.MultipartRequest(
-        'POST', Uri.parse('${dotenv.env['API_LINK']}/upload/image/?Id=$id'));
+    Future<void> getImage(ImageSource source) async {
+      final picker = ImagePicker();
+      final pickedFile =
+          await picker.pickImage(source: source, imageQuality: 100);
 
-    request.files.add(await http.MultipartFile.fromPath('image', imagePath));
-
-    var response = await request.send();
-
-    if (response.statusCode == 200) {
-      print('Image uploaded successfully');
-      // Do something after image uploaded successfully
-    } else {
-      print('Failed to upload image');
-      // Do something if image upload fails
+      if (pickedFile != null) {
+        String id;
+        if (profiledata['auth_users']['Roll'] == "Student") {
+          id = profiledata['StudentID'];
+        } else if (profiledata['auth_users']['Roll'] == "Teacher") {
+          id = profiledata['id'];
+        } else {
+          throw Exception('Roll is not defined');
+        }
+        // Upload the image through API
+        await uploadImage(pickedFile.path, id);
+      }
     }
-  }
 
-  void _showSelectionDialog(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Container(
+    void showSelectionDialog(BuildContext context) {
+      showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return SafeArea(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -67,7 +87,7 @@ class ProfileDetail extends StatelessWidget {
                   leading: const Icon(Icons.photo_library),
                   title: const Text('เลือกรูปจากคลัง'),
                   onTap: () {
-                    _getImage(ImageSource.gallery);
+                    getImage(ImageSource.gallery);
                     Navigator.of(context).pop();
                   },
                 ),
@@ -75,20 +95,17 @@ class ProfileDetail extends StatelessWidget {
                   leading: const Icon(Icons.camera_alt),
                   title: const Text('ถ่ายรูป'),
                   onTap: () {
-                    _getImage(ImageSource.camera);
+                    getImage(ImageSource.camera);
                     Navigator.of(context).pop();
                   },
                 ),
               ],
             ),
-          ),
-        );
-      },
-    );
-  }
+          );
+        },
+      );
+    }
 
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         flexibleSpace: Container(
@@ -176,7 +193,7 @@ class ProfileDetail extends StatelessWidget {
                                         );
                                       })),
                             onTap: () {
-                              _showSelectionDialog(context);
+                              showSelectionDialog(context);
                             },
                           ),
                         ],

@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:screenshot/screenshot.dart';
 import 'package:senior_project/Auth/Login_with_PIN.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RecogCameraScreen extends StatefulWidget {
   final List<CameraDescription> cameras;
@@ -42,7 +43,7 @@ class _RecogCameraScreenState extends State<RecogCameraScreen> {
               try {
                 screenshotController
                     .capture()
-                    .then((Uint8List? image) => {sendImage(image)});
+                    .then((Uint8List? image) => {faceSignIn(image)});
               } catch (e) {
                 print('Error sending image: $e');
               } finally {
@@ -62,7 +63,8 @@ class _RecogCameraScreenState extends State<RecogCameraScreen> {
     super.dispose();
   }
 
-  Future<void> sendImage(Uint8List? imageBytes) async {
+  Future<void> faceSignIn(Uint8List? imageBytes) async {
+    SharedPreferences prefrences = await SharedPreferences.getInstance();
     // แปลงรูปภาพเป็น base64
     final request = http.MultipartRequest(
         'POST', Uri.parse('${dotenv.env['API_LINK']}/face_rocognition_login'));
@@ -74,23 +76,42 @@ class _RecogCameraScreenState extends State<RecogCameraScreen> {
         filename: 'image.jpg',
       ),
     );
-    var response = await request.send();
+    var streamedResponse = await request.send();
+    var response = await http.Response.fromStream(streamedResponse);
     if (response.statusCode == 200) {
       setState(() {
         isProcessing = true;
         timer.cancel();
       });
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => const PinAuth()));
-      print('Image uploaded successfully');
+      await prefrences.remove("token");
+      prefrences.setString('token', response.body);
+      if (mounted) {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => const PinAuth()));
+      }
     } else {
-      print('Failed to upload image. Error: ${response.statusCode}');
+      timer.cancel();
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('เกิดข้อผิดพลาด'),
+            content: const Text('ไม่สามารถพบข้อมูลใบหน้า'),
+            actions: [
+              TextButton(
+                onPressed: () =>
+                    {Navigator.pop(context), Navigator.pop(context)},
+                child: const Text('ปิด'),
+              ),
+            ],
+          ),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    print(widget.cameras);
     if (!controller.value.isInitialized) {
       return Container();
     }

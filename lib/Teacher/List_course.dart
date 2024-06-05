@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:senior_project/Teacher/Summary_attendance.dart';
+import 'package:senior_project/Teacher/summary_attendance.dart';
 import 'package:senior_project/main.dart';
 
 class CourseList extends StatefulWidget {
@@ -41,9 +41,7 @@ class _CourseListState extends State<CourseList> {
       setState(() {
         course = data.cast<Map<String, dynamic>>();
       });
-    } else {
-      throw Exception('Failed to load data');
-    }
+    } else {}
   }
 
   @override

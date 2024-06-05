@@ -33,7 +33,7 @@ class _CameraScreenState extends State<CameraScreen> {
     );
     controller = CameraController(
       firstCamera,
-      ResolutionPreset.max,
+      ResolutionPreset.high,
       enableAudio: false,
     );
     controller?.initialize().then((_) {
@@ -95,20 +95,46 @@ class _CameraScreenState extends State<CameraScreen> {
     try {
       // Rename the file
       await file.rename(newPath);
-
       // Upload the renamed file
       Uri uri = Uri.parse(
           '${dotenv.env['API_LINK']}/upload/Video/?student_id=${widget.profiledata['StudentID']}');
       var request = http.MultipartRequest('POST', uri)
         ..files.add(await http.MultipartFile.fromPath('video', newPath));
-      var response = await request.send();
-      if (response.statusCode == 200) {
-        print('Video uploaded successfully');
+      var streamedResponse = await request.send();
+      if (streamedResponse.statusCode == 200) {
       } else {
-        print('Failed to upload video');
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Error!'),
+              content: const Text('Failed to upload video'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('ปิด'),
+                ),
+              ],
+            ),
+          );
+        }
       }
     } catch (e) {
-      print('Error uploading video: $e');
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Error!'),
+            content: const Text('Failed to upload video'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('ปิด'),
+              ),
+            ],
+          ),
+        );
+      }
     }
   }
 

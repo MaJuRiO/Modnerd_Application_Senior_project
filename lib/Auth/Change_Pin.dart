@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:senior_project/model/changePINsuccess.dart';
+import 'package:senior_project/model/change_pin_success.dart';
 import 'package:senior_project/model/utils/colors_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -74,9 +74,11 @@ class _ChangePinState extends State<ChangePin> {
         body: jsonEncode(<String, String>{"pin": enteredPin, "Email": email}),
       );
       if (response.statusCode == 202) {
-        Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return const Change_Pin_Success();
-        }));
+        if (mounted) {
+          Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return const ChangePinSuccess();
+          }));
+        }
       } else {}
     } else {}
   }
