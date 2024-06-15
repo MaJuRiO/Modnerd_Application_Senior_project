@@ -8,7 +8,6 @@ import 'package:senior_project/main.dart';
 
 class CourseList extends StatefulWidget {
   final Map<String, dynamic> profiledata;
-
   const CourseList({
     super.key,
     required this.profiledata,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:senior_project/class_detail.dart';
 import 'package:senior_project/main.dart';
-import 'package:senior_project/model/class_summary.dart';
+import 'package:senior_project/Teacher/class_summary.dart';
 import 'utils/colors_util.dart';
 import 'utils/date_utils.dart' as date_util;
 
@@ -32,12 +32,29 @@ class _ScheduleState extends State<Schedule> {
 
   @override
   void initState() {
-    currentMonthList = date_util.DateUtils.daysInMonth(currentDateTime);
-    currentMonthList.sort((a, b) => a.day.compareTo(b.day));
+    super.initState();
+    // กำหนดค่าเริ่มต้นและค่าสิ้นสุด
+    DateTime startDate = DateTime(2024, 1, 15); // ตัวอย่าง: 1 มกราคม 2023
+    DateTime endDate = DateTime(2024, 5, 31); // ตัวอย่าง: 31 มกราคม 2023
+
+    // สร้างรายการวันระหว่าง startDate และ endDate
+    currentMonthList = _generateDateRange(startDate, endDate);
+
+    // กำจัดค่าที่ซ้ำกัน
     currentMonthList = currentMonthList.toSet().toList();
+
+    // สร้าง ScrollController
     scrollController =
         ScrollController(initialScrollOffset: 70.0 * currentDateTime.day);
-    super.initState();
+  }
+
+// ฟังก์ชันสำหรับสร้างรายการวันระหว่าง startDate และ endDate
+  List<DateTime> _generateDateRange(DateTime start, DateTime end) {
+    List<DateTime> days = [];
+    for (int i = 0; i <= end.difference(start).inDays; i++) {
+      days.add(DateTime(start.year, start.month, start.day + i));
+    }
+    return days;
   }
 
   bool isTimePassed(String date, String startTimeString, String endTimeString) {
@@ -82,7 +99,9 @@ class _ScheduleState extends State<Schedule> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 0, 0, 10),
       child: Text(
-        date_util.DateUtils.months[currentDateTime.month - 1] +
+        currentDateTime.day.toString() +
+            ' ' +
+            date_util.DateUtils.months[currentDateTime.month - 1] +
             ' ' +
             currentDateTime.year.toString(),
         style: TextStyle(
@@ -124,17 +143,22 @@ class _ScheduleState extends State<Schedule> {
             height: 80,
             decoration: BoxDecoration(
                 gradient: LinearGradient(
-                    colors: (currentMonthList[index].day != currentDateTime.day)
-                        ? [
-                            Colors.white.withOpacity(0.8),
-                            Colors.white.withOpacity(0.7),
-                            Colors.white.withOpacity(0.6)
-                          ]
-                        : [
-                            HexColor("ED6184"),
-                            HexColor("EF315B"),
-                            HexColor("E2042D")
-                          ],
+                    colors:
+                        (currentMonthList[index].day != currentDateTime.day ||
+                                currentMonthList[index].month !=
+                                    currentDateTime.month ||
+                                currentMonthList[index].year !=
+                                    currentDateTime.year)
+                            ? [
+                                Colors.white.withOpacity(0.8),
+                                Colors.white.withOpacity(0.7),
+                                Colors.white.withOpacity(0.6)
+                              ]
+                            : [
+                                HexColor("ED6184"),
+                                HexColor("EF315B"),
+                                HexColor("E2042D")
+                              ],
                     begin: const FractionalOffset(0.0, 0.0),
                     end: const FractionalOffset(0.0, 1.0),
                     stops: const [0.0, 0.5, 1.0],
@@ -157,10 +181,14 @@ class _ScheduleState extends State<Schedule> {
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color:
-                            (currentMonthList[index].day != currentDateTime.day)
-                                ? HexColor("465876")
-                                : Colors.white),
+                        color: (currentMonthList[index].day !=
+                                    currentDateTime.day ||
+                                currentMonthList[index].month !=
+                                    currentDateTime.month ||
+                                currentMonthList[index].year !=
+                                    currentDateTime.year)
+                            ? HexColor("465876")
+                            : Colors.white),
                   ),
                   Text(
                     date_util.DateUtils
@@ -168,10 +196,14 @@ class _ScheduleState extends State<Schedule> {
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color:
-                            (currentMonthList[index].day != currentDateTime.day)
-                                ? HexColor("465876")
-                                : Colors.white),
+                        color: (currentMonthList[index].day !=
+                                    currentDateTime.day ||
+                                currentMonthList[index].month !=
+                                    currentDateTime.month ||
+                                currentMonthList[index].year !=
+                                    currentDateTime.year)
+                            ? HexColor("465876")
+                            : Colors.white),
                   )
                 ],
               ),
@@ -217,7 +249,8 @@ class _ScheduleState extends State<Schedule> {
               padding: EdgeInsets.zero,
               itemBuilder: (BuildContext context, int index) {
                 if (widget.todos[index]['Date'] ==
-                    DateFormat('yyyy-MM-dd').format(currentDateTime)) {
+                        DateFormat('yyyy-MM-dd').format(currentDateTime) &&
+                    (currentDateTime).isBefore(DateTime(2024, 5, 31))) {
                   return Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -325,29 +358,18 @@ class _ScheduleState extends State<Schedule> {
                                       width: 10,
                                     ),
                                     GestureDetector(
-                                      onTap: isTimePassed(
-                                              widget.todos[index]['Date'],
-                                              widget.todos[index]
-                                                      ['course_detail']
-                                                  ['start_time'],
-                                              widget.todos[index]
-                                                  ['course_detail']['end_time'])
-                                          ? () async {
-                                              if (widget.title == 'Student') {
-                                                Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          ClassDetail(
-                                                        attendenceDetail:
-                                                            widget.todos[index],
-                                                        profilesData:
-                                                            widget.profilesData,
-                                                      ),
-                                                    ));
-                                              }
-                                            }
-                                          : null,
+                                      onTap: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => ClassDetail(
+                                                attendenceDetail:
+                                                    widget.todos[index],
+                                                profilesData:
+                                                    widget.profilesData,
+                                              ),
+                                            ));
+                                      },
                                       child: isTimePassed(
                                                   widget.todos[index]['Date'],
                                                   widget.todos[index]
@@ -392,7 +414,8 @@ class _ScheduleState extends State<Schedule> {
                                                   padding: EdgeInsets.all(8.0),
                                                   child: Text('เช็คชื่อ'),
                                                 ),
-                                              )),
+                                              ),
+                                            ),
                                     )
                                   ],
                                 ),
@@ -435,7 +458,8 @@ class _ScheduleState extends State<Schedule> {
               padding: EdgeInsets.zero,
               itemBuilder: (BuildContext context, int index) {
                 if (widget.todos[index]['recurrence_pattern'] ==
-                    DateFormat.EEEE().format(currentDateTime)) {
+                        DateFormat.EEEE().format(currentDateTime) &&
+                    (currentDateTime).isBefore(DateTime(2024, 5, 31))) {
                   return Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
