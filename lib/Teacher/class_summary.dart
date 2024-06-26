@@ -23,18 +23,19 @@ class ClassSummary extends StatefulWidget {
 
 class _ClassSummaryState extends State<ClassSummary> {
   int touchedIndex = -1;
-  String _data = '';
+  String coursecheckinCode = '';
   List<dynamic> studentsList = [];
   Map<String, dynamic>? status;
   Future<List<Map<String, dynamic>>>? _futureData;
   final TextEditingController _textController = TextEditingController();
+  final TextEditingController _numberController = TextEditingController();
   @override
   void initState() {
     super.initState();
     fetchStudentList();
   }
 
-  Future<List<Map<String, dynamic>>> _sendDataToAPI(String text) async {
+  Future<List<Map<String, dynamic>>> _searchStudent(String text) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
     Map<String, dynamic> tokenMap = json.decode(token!);
@@ -102,7 +103,7 @@ class _ClassSummaryState extends State<ClassSummary> {
       // ดึงข้อมูล JSON จาก response
       String data = json.decode(response.body);
       setState(() {
-        _data = data;
+        coursecheckinCode = data;
       });
     } else {}
   }
@@ -127,10 +128,37 @@ class _ClassSummaryState extends State<ClassSummary> {
       // ดึงข้อมูล JSON จาก response
       Map<String, dynamic> data = json.decode(response.body);
       setState(() {
-        _data = data['Course_code'];
+        coursecheckinCode = data['Course_code'];
       });
     } else {
       throw Exception('ไม่สามารถดึงข้อมูลได้');
+    }
+  }
+
+  Future<void> updateCourseLateTime(String time) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    Map<String, dynamic> tokenMap = json.decode(token!);
+    String accessToken = tokenMap['access_token'];
+    final response = await http.patch(
+      Uri.parse('${dotenv.env['API_LINK']}/update_latetime'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $accessToken'
+      },
+      body: jsonEncode(<String, String>{
+        "Course_code": "${widget.classdetail['Course_code']}",
+        "Date": time
+      }),
+    );
+    if (response.statusCode == 201) {
+      // ดึงข้อมูล JSON จาก response
+      Map<String, dynamic> data = json.decode(response.body);
+      setState(() {
+        coursecheckinCode = data['Course_code'];
+      });
+    } else {
+      return;
     }
   }
 
@@ -176,7 +204,7 @@ class _ClassSummaryState extends State<ClassSummary> {
                           onPressed: () {
                             setState(() {
                               _futureData =
-                                  _sendDataToAPI(_textController.text);
+                                  _searchStudent(_textController.text);
                             });
                           },
                         ),
@@ -256,6 +284,79 @@ class _ClassSummaryState extends State<ClassSummary> {
     });
   }
 
+  void _showNumberInputPopup() {
+    // Create a ValueNotifier to track the input field value
+    ValueNotifier<bool> isInputValid = ValueNotifier(false);
+
+    // Add a listener to the TextEditingController to update the ValueNotifier
+    _numberController.addListener(() {
+      isInputValid.value = _numberController.text.isNotEmpty;
+    });
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('ตั้งค่า เวลา'),
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(
+                maxHeight: 150), // Limit the height of the dialog
+            child: IntrinsicHeight(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Center(
+                    child: SizedBox(
+                      width: 100, // Set the width of the input field
+                      child: TextField(
+                        controller: _numberController,
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            fontSize:
+                                24), // Increase the size of the input text
+                        decoration: const InputDecoration(
+                          hintText: "30",
+                          isDense: true, // Less vertical padding
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 8), // Adjust vertical padding
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            // Use a ValueListenableBuilder to rebuild the OK button based on the ValueNotifier
+            ValueListenableBuilder<bool>(
+              valueListenable: isInputValid,
+              builder: (BuildContext context, bool isValid, Widget? child) {
+                return TextButton(
+                  onPressed: isValid
+                      ? () async {
+                          updateCourseLateTime(_numberController.text);
+                          Navigator.of(context).pop();
+                        }
+                      : null,
+                  child: const Text(
+                      'OK'), // Disable the button when input is not valid
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -327,46 +428,76 @@ class _ClassSummaryState extends State<ClassSummary> {
                           ),
                           ElevatedButton(
                             onPressed: () async {
-                              await fetchCourseCheckinCode().then((value) {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text(
-                                        'Class Code',
-                                        style: TextStyle(color: Colors.black54),
-                                      ),
-                                      content: SizedBox(
-                                        height: 30,
-                                        child: Center(
-                                          child: Text(
-                                            _data,
-                                            style: const TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold),
+                              await fetchCourseCheckinCode();
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          'Class Code',
+                                          style:
+                                              TextStyle(color: Colors.black54),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(
+                                              3, 1, 1, 1),
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                widget.classdetail['late_time'],
+                                                style: const TextStyle(
+                                                    fontSize: 16),
+                                              ),
+                                              IconButton(
+                                                alignment: Alignment.centerLeft,
+                                                onPressed:
+                                                    _showNumberInputPopup,
+                                                icon: const Icon(
+                                                    Icons.timer_outlined),
+                                              )
+                                            ],
                                           ),
                                         ),
-                                      ),
-                                      actions: <Widget>[
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                          child: const Text('ปิด'),
-                                        ),
-                                        IconButton(
-                                          onPressed: () {
-                                            updateCourseCheckinCode();
-                                            setState(() {});
-                                            Navigator.of(context).pop();
-                                          },
-                                          icon: const Icon(Icons.refresh),
-                                        ),
                                       ],
-                                    );
-                                  },
-                                );
-                              });
+                                    ),
+                                    content: SizedBox(
+                                      height: 30,
+                                      child: Center(
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              coursecheckinCode,
+                                              style: const TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            IconButton(
+                                              padding: EdgeInsets.zero,
+                                              onPressed:
+                                                  updateCourseCheckinCode,
+                                              icon: const Icon(Icons.refresh),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('ปิด'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
                             },
                             style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.green[400]),
