@@ -17,7 +17,7 @@ This project is a starting point for a Flutter application.
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/senior_project.git
+    git clone https://github.com/MaJuRiO/Modnerd_Application_Senior_project
     cd senior_project
     ```
 
